@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>10 — The bus factor isn't one, it's zero — Farouk Umar</title>
+<meta name="description" content="The dangerous version isn't that only one person understands the system. It's that nobody does — including the person who shipped it. Why a program is a theory, not a codebase.">
+
+<link rel="icon" type="image/svg+xml" href="images/bus-favicon.svg">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://papa.onle.gs/writing/the-bus-factor-is-zero.html">
+<meta property="og:title" content="10 — The bus factor isn't one, it's zero">
+<meta property="og:description" content="The dangerous version isn't that only one person understands the system. It's that nobody does — including the person who shipped it. Why a program is a theory, not a codebase.">
+<meta property="og:image" content="https://papa.onle.gs/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="1200">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="10 — The bus factor isn't one, it's zero">
+<meta name="twitter:description" content="The dangerous version isn't that only one person understands the system. It's that nobody does — including the person who shipped it. Why a program is a theory, not a codebase.">
+<meta name="twitter:image" content="https://papa.onle.gs/og.jpg">
+
+<link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+<main>
+  <a class="back" href="index.html">&larr; Writing</a>
+
+  <article class="prose">
+    <h1>10 — The bus factor isn't one, it's zero</h1>
+    <p class="article-meta">Part of <em>10 reasons why your vibe coded app won't scale</em> &middot; Farouk Umar</p>
+
+    <p>
+      The dangerous version isn't that only one person understands the
+      system. It's that nobody does — including the person who shipped it.
+    </p>
+
+    <p>
+      Peter Naur's 1985 essay <em>Programming as Theory Building</em> is
+      the spine of this one, and it's held up better than almost anything
+      else written about software since: a program is a <em>theory</em>
+      held by the people who built it. The code and the documentation are
+      a trace of that theory, not the theory itself. "The death of a
+      program," Naur wrote, "happens when the programmer team possessing
+      its theory is dissolved." By that definition, a vibe-coded app is
+      dead on arrival — the theory never formed in a human head to begin
+      with. The bus factor doesn't count down from some healthy number.
+      It starts at zero on merge day, because the architectural intent
+      lived in the prompts, and the prompts are gone.
+    </p>
+
+    <div class="diagram">
+      <img src="images/theory-evaporates.svg" alt="Flowchart comparing traditional development, where intent leads to a programmer reasoning through design, code written by hand, a retained mental model, and future changes that consult and extend that model, against vibe-coded development, where intent leads to a prompt, generated code, a discarded prompt, no model ever forming, and future changes requiring a re-prompt from scratch.">
+    </div>
+    <p class="diagram-caption">
+      In the traditional loop, code is a byproduct of understanding. In the vibe loop, code is a byproduct of a prompt — and the prompt is the part that gets thrown away.
+    </p>
+
+    <p>
+      Rubber-stamp review is how this spreads. When AI output volume
+      outpaces a reviewer's ability to re-derive the intent behind it,
+      review degrades into "looks plausible" — a documented pattern called
+      automation bias, measured at 26% higher acceptance of erroneous
+      recommendations when the recommendation comes with the appearance of
+      authority. Six months later you're an archaeologist in a codebase
+      with your own name on every commit.
+    </p>
+
+    <p>
+      Tests don't rescue you here, and it's worth being explicit about
+      why: they were written by the same model, from the same
+      misunderstanding, so they tend to confirm what the code
+      <em>does</em> rather than specify what it <em>should</em> do. Ninety
+      percent coverage with zero confidence is a completely normal outcome
+      — coverage measures lines executed, not intent verified. The
+      practical split is to write the contract tests at the boundary
+      yourself, where the actual specification lives, and let an agent
+      fill in the unit tests underneath that boundary.
+    </p>
+
+    <div class="diagram">
+      <img src="images/coverage-confidence.svg" alt="Quadrant chart plotting coverage against confidence: hand-written contract tests sit at moderate coverage and high confidence, in the 'real safety net' quadrant, while AI-generated tests written from the same prompt as the code sit at high coverage but low confidence, in the 'false sense of security' quadrant.">
+    </div>
+    <p class="diagram-caption">
+      High coverage and low confidence aren't opposites — they're a common outcome when the tests share the same blind spot as the code.
+    </p>
+
+    <p>
+      The evidence for the comprehension gap is uncomfortable reading. A
+      2025 randomised controlled trial from METR had 16 experienced
+      open-source developers complete 246 real tasks using Cursor and
+      Claude — and found AI assistance made them 19% <em>slower</em>,
+      while they'd forecast being 24% faster and believed, after the fact,
+      that they had been roughly 20% faster. It's the cleanest measurement
+      available of confident miscalibration about one's own AI-assisted
+      work. DORA's 2024 report found the aggregate signature at
+      organisation scale: 25% more AI adoption correlated with a 1.5% drop
+      in throughput and a 7.2% drop in delivery stability — individual
+      flow feels great, and the shared system degrades anyway, which is
+      exactly what you'd expect when nobody's holding the theory of how it
+      fits together. Separately, a comprehension quiz found engineers who
+      used AI to <em>generate</em> code scored 50% on questions about that
+      code, against 67% for engineers who'd used AI only for Q&amp;A while
+      writing it themselves.
+    </p>
+
+    <p>
+      Every other item in this series is a fixable engineering problem.
+      This one is different, because it removes your ability to fix the
+      others: if nobody can explain how the data model got tangled or why
+      the queue isn't idempotent, nobody can fix it with confidence
+      either. The fix is unglamorous — architecture decision records for
+      anything structural, a written system narrative a new engineer reads
+      on day one — but the rule that does the most work in the entire
+      series is simpler than any of that: if you can't explain how it
+      works, you don't merge it. The agent can write the code. You still
+      have to own the theory.
+    </p>
+
+    <p>
+      If you've shipped fast with AI tools and want a second pair of eyes
+      before it goes further, that's exactly what a vibe code audit is for.
+    </p>
+
+    <p class="book">
+      <a class="button" data-calendly href="https://calendly.com/papaonlegs/30min">Book a call</a>
+    </p>
+
+    <div class="references">
+      <h2>References</h2>
+      <ol>
+        <li><a href="https://pages.cs.wisc.edu/~remzi/Naur.pdf">Peter Naur — Programming as Theory Building</a></li>
+        <li><a href="https://metr.org/blog/2025-07-10-early-2025-ai-experienced-os-dev-study/">METR — AI &amp; experienced developer productivity</a></li>
+        <li><a href="https://dora.dev/research/2024/dora-report/">DORA 2024 — State of DevOps</a></li>
+        <li><a href="https://www.cognitect.com/blog/2011/11/15/documenting-architecture-decisions">Michael Nygard — Documenting Architecture Decisions</a></li>
+        <li><a href="https://addyosmani.com/blog/comprehension-debt/">Addy Osmani — Comprehension Debt</a></li>
+      </ol>
+    </div>
+  </article>
+</main>
+<script src="../main.js" defer></script>
+</body>
+</html>
