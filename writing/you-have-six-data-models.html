@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>1 — You have six data models and you think you have one — Farouk Umar</title>
+<meta name="description" content="Vibe-coded apps quietly grow one data model per feature request. Here's why it happens, what it costs, and how to migrate your way out.">
+
+<link rel="icon" type="image/png" sizes="32x32" href="../favicon-32.png">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://papa.onle.gs/writing/you-have-six-data-models.html">
+<meta property="og:title" content="1 — You have six data models and you think you have one">
+<meta property="og:description" content="Vibe-coded apps quietly grow one data model per feature request. Here's why it happens, what it costs, and how to migrate your way out.">
+<meta property="og:image" content="https://papa.onle.gs/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="1200">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="1 — You have six data models and you think you have one">
+<meta name="twitter:description" content="Vibe-coded apps quietly grow one data model per feature request. Here's why it happens, what it costs, and how to migrate your way out.">
+<meta name="twitter:image" content="https://papa.onle.gs/og.jpg">
+
+<link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+<main>
+  <a class="back" href="index.html">&larr; Writing</a>
+
+  <article class="prose">
+    <h1>1 — You have six data models and you think you have one</h1>
+    <p class="article-meta">Part of <em>10 reasons why your vibe coded app won't scale</em> &middot; 29 July 2026 &middot; Farouk Umar</p>
+
+    <p>
+      Ask your codebase what a "user" is. Count the answers. That number is
+      roughly your future migration bill.
+    </p>
+
+    <p>
+      Open a few weeks into most vibe-coded apps and you'll find <code>users</code>,
+      <code>accounts</code>, <code>profiles</code>, and <code>members</code> —
+      overlapping tables, each invented by a different feature request, partially
+      in sync, "joined" by matching email strings in application code instead of
+      a real foreign key.
+    </p>
+
+    <div class="diagram">
+      <img src="images/data-models-messy.svg" alt="Four tables — users, accounts, profiles, members — connected by dotted lines labelled 'matched by email, no FK', with no real foreign keys between them.">
+    </div>
+    <p class="diagram-caption">
+      Dotted lines are "joined by matching email strings in app code," not real
+      foreign keys. That's the whole diagnosis in one picture.
+    </p>
+
+    <p>
+      This isn't carelessness — it's what you get by construction. Each prompt
+      optimises for the feature in front of it, not the system behind it. The
+      model has no persistent memory of the domain model it invented three
+      prompts ago, so it invents a new one that happens to solve today's
+      request. This is measurable, not a vibe: GitClear's analysis of 211
+      million changed lines found copy-pasted code overtook refactored code for
+      the first time on record in 2024, with duplication climbing and
+      refactoring falling under 10% of changes. Their 2026 follow-up, on 623
+      million changes, found refactoring down to 3.8%. Six data models is the
+      data-layer symptom of the same habit that shows up as duplicated
+      functions everywhere else.
+    </p>
+
+    <p>
+      The fix isn't clever — it's just old. Codd's normal forms exist
+      specifically to stop one fact being stored in more than one place; Eric
+      Evans' domain-driven design calls the missing piece a
+      <em>ubiquitous language</em> — one authored model everyone, including the
+      AI, is working from.
+    </p>
+
+    <div class="diagram">
+      <img src="images/data-models-clean.svg" alt="Three tables — user, account, membership — with proper foreign keys: user owns account, user has membership, account grants membership.">
+    </div>
+    <p class="diagram-caption">
+      The authored alternative: every fact owned exactly once.
+    </p>
+
+    <p>
+      This isn't a style complaint. Split identity is where sync bugs live —
+      a user cancels in one table and stays "active" in another, a permission
+      check reads the table nobody updated. And it makes migrations dangerous
+      even in experienced hands: a single schema migration at GitHub cascaded
+      into a replica crash-loop that took down Actions, the API, and pull
+      requests. Resend lost every table in production for twelve hours after a
+      migration command meant for a local database ran against the live one.
+      Neither company was short on engineering discipline — they just show how
+      little margin a migration has even when the model underneath it is
+      clean. On four tables joined by string-matching instead of foreign keys,
+      that margin is close to zero.
+    </p>
+
+    <p>
+      You can't rename your way out of this live. The way through is boring on
+      purpose: expand, dual-write, backfill, migrate reads, migrate writes,
+      contract. Never a rename in place. Deploying the code and releasing the
+      behaviour are two separate events, not one.
+    </p>
+
+    <div class="diagram">
+      <img src="images/data-models-migrate.svg" alt="Flowchart: 1. Expand — add USER table, keep old tables live. 2. Dual-write — old and new. 3. Backfill — batch-copy history. 4. Migrate reads. 5. Migrate writes. 6. Contract — drop old tables.">
+    </div>
+    <p class="diagram-caption">
+      The escape route — each step ships and bakes on its own before the next one starts.
+    </p>
+
+    <p>
+      If you've shipped fast with AI tools and want a second pair of eyes
+      before it goes further, that's exactly what a vibe code audit is for.
+    </p>
+
+    <p class="book">
+      <a class="button" data-calendly href="https://calendly.com/papaonlegs/30min">Book a call</a>
+    </p>
+
+    <div class="references">
+      <h2>References</h2>
+      <ol>
+        <li><a href="https://www.gitclear.com/ai_assistant_code_quality_2025_research">GitClear — AI Copilot Code Quality (2025)</a></li>
+        <li><a href="https://www.gitclear.com/the_ai_code_quality_maintainability_gap">GitClear — The Maintainability Gap (2026)</a></li>
+        <li><a href="https://arpit.substack.com/p/alter-table-taking-down-github">GitHub — how one ALTER TABLE took the site down</a></li>
+        <li><a href="https://resend.com/blog/incident-report-for-february-21-2024">Resend — incident report, 21 February 2024</a></li>
+        <li><a href="https://en.wikipedia.org/wiki/Database_normalization">Codd — database normalisation</a></li>
+      </ol>
+    </div>
+  </article>
+</main>
+<script src="../main.js" defer></script>
+</body>
+</html>
