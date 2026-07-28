@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2 — 40ms locally, 40 seconds in production — Farouk Umar</title>
+<meta name="description" content="Vibe-coded apps run fine on 50 rows of test data and fall over on real traffic. Here's why N+1 queries survive review, and how to catch them before production does.">
+
+<link rel="icon" type="image/svg+xml" href="images/clock-favicon.svg">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://papa.onle.gs/writing/40ms-locally-40-seconds-in-production.html">
+<meta property="og:title" content="2 — 40ms locally, 40 seconds in production">
+<meta property="og:description" content="Vibe-coded apps run fine on 50 rows of test data and fall over on real traffic. Here's why N+1 queries survive review, and how to catch them before production does.">
+<meta property="og:image" content="https://papa.onle.gs/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="1200">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="2 — 40ms locally, 40 seconds in production">
+<meta name="twitter:description" content="Vibe-coded apps run fine on 50 rows of test data and fall over on real traffic. Here's why N+1 queries survive review, and how to catch them before production does.">
+<meta name="twitter:image" content="https://papa.onle.gs/og.jpg">
+
+<link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+<main>
+  <a class="back" href="index.html">&larr; Writing</a>
+
+  <article class="prose">
+    <h1>2 — 40ms locally, 40 seconds in production</h1>
+    <p class="article-meta">Part of <em>10 reasons why your vibe coded app won't scale</em> &middot; Farouk Umar</p>
+
+    <p>
+      Same code. Same query. A hundred times the rows. The database was
+      never part of the design.
+    </p>
+
+    <p>
+      Small data hides big-O sins. One query per row is indistinguishable
+      from fast when the row count is fifty. ORMs make this easy to write
+      and nearly invisible in review — <code>orders.map(o =&gt; o.customer.name)</code>
+      reads beautifully and is a disaster waiting for real traffic. AI
+      assistants reproduce this lazy-loading idiom constantly, because it
+      dominates the training data: it's the pattern every tutorial uses,
+      because every tutorial's example table has ten rows in it.
+    </p>
+
+    <div class="diagram">
+      <img src="images/n1-query-sequence.svg" alt="Sequence diagram: browser requests /orders, API selects orders, then loops per order selecting each customer individually. Dev: 11 queries, ~40ms. Prod: 100,001 queries, ~40s, pool exhausted.">
+    </div>
+    <p class="diagram-caption">
+      Eleven queries in dev. A hundred thousand and one in production. Same loop.
+    </p>
+
+    <p>
+      This isn't a one-off oversight — it's what the model optimises for.
+      EffiBench, which benchmarked 42 LLMs on runtime efficiency, found
+      GPT-4-generated code runs roughly 3.1x slower than the canonical
+      human solution on average, and up to 13.9x slower with 43.9x more
+      memory in the worst cases — while still being functionally correct.
+      Functionally correct is what passes a test suite. It has nothing to
+      say about query plans.
+    </p>
+
+    <p>
+      Missing indexes make this worse because they're silent. Postgres
+      will happily sequential-scan a 500-row table — correctly, that's the
+      right plan at that size — and then sequential-scan the same query
+      against 2 million rows with no error, no warning, just a 2ms query
+      that's quietly become a 4-second one. One widely shared write-up
+      described identical code going from 11 queries and 10 rows in dev to
+      40,001 queries and 40,000 rows in production, passing every test the
+      whole way. These are individual engineers' accounts, not corporate
+      postmortems, but the shape recurs constantly enough to trust the
+      pattern even where the exact numbers are anecdotal.
+    </p>
+
+    <p>
+      The serverless era adds a second failure mode on top: no connection
+      pooling. Postgres defaults to <code>max_connections=100</code>, and
+      every serverless invocation that opens its own direct connection
+      burns through that ceiling in seconds under any real burst of
+      traffic — not because the query is slow, but because there's nowhere
+      left to put it.
+    </p>
+
+    <div class="diagram">
+      <img src="images/n1-pool-exhaustion.svg" alt="Flowchart: 150 concurrent serverless invocations each opening a direct connection exhaust Postgres's max_connections=100 limit and get 'too many clients already'. With a pooler like PgBouncer or Supavisor in front, the same burst shares a pool of 20 connections successfully.">
+    </div>
+    <p class="diagram-caption">
+      Without a pooler, connection count scales with traffic. With one, it doesn't.
+    </p>
+
+    <p>
+      None of this needs a rewrite — it needs a habit. A query budget per
+      request enforced in CI (Bullet, Django Debug Toolbar, Prisma's query
+      logs all catch this cheaply), <code>EXPLAIN ANALYZE</code> before
+      anything ships, indexes chosen from observed access patterns rather
+      than guesswork, and load-testing with production-shaped data instead
+      of the ten rows sitting in your seed script. A pooler in front of the
+      database is table stakes the moment you're serverless.
+    </p>
+
+    <p>
+      If you've shipped fast with AI tools and want a second pair of eyes
+      before it goes further, that's exactly what a vibe code audit is for.
+    </p>
+
+    <p class="book">
+      <a class="button" data-calendly href="https://calendly.com/papaonlegs/30min">Book a call</a>
+    </p>
+
+    <div class="references">
+      <h2>References</h2>
+      <ol>
+        <li><a href="https://use-the-index-luke.com/">Use The Index, Luke!</a></li>
+        <li><a href="https://arxiv.org/pdf/2402.02037">EffiBench — LLM code efficiency benchmark</a></li>
+        <li><a href="https://neon.com/docs/connect/connection-pooling">Neon — connection pooling</a></li>
+        <li><a href="https://www.prisma.io/docs/orm/prisma-client/setup-and-configuration/databases-connections/pgbouncer">Prisma + PgBouncer docs</a></li>
+        <li><a href="https://medium.com/mixpaneleng/finding-and-optimizing-n-1-queries-on-a-relational-database-1ce02f1f2ffb">Mixpanel Engineering — finding N+1 queries</a></li>
+      </ol>
+    </div>
+  </article>
+</main>
+<script src="../main.js" defer></script>
+</body>
+</html>
