@@ -5,98 +5,30 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Farouk Umar — Engineering Consultant</title>
 <meta name="description" content="Farouk Umar — engineering consulting. Architecture, organisational health, and scaling systems and teams.">
-<link rel="icon" href="data:,">
-<style>
-  :root {
-    --bg: #fafafa;
-    --fg: #1a1a1a;
-    --muted: #666;
-    --rule: #ddd;
-    --accent: #1a1a1a;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #121212;
-      --fg: #eaeaea;
-      --muted: #999;
-      --rule: #2e2e2e;
-      --accent: #eaeaea;
-    }
-  }
-  * { box-sizing: border-box; }
-  html, body { margin: 0; padding: 0; }
-  body {
-    background: var(--bg);
-    color: var(--fg);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    line-height: 1.55;
-    -webkit-font-smoothing: antialiased;
-  }
-  main {
-    max-width: 38rem;
-    margin: 0 auto;
-    padding: 4.5rem 1.5rem 3rem;
-  }
-  h1 {
-    font-size: 1.6rem;
-    font-weight: 600;
-    margin: 0 0 0.15rem;
-    letter-spacing: -0.01em;
-  }
-  .tagline {
-    font-size: 1.05rem;
-    color: var(--muted);
-    margin: 0 0 2.25rem;
-  }
-  p.intro {
-    font-size: 1rem;
-    margin: 0 0 2rem;
-  }
-  h2 {
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--muted);
-    font-weight: 600;
-    margin: 0 0 0.9rem;
-  }
-  ul.services {
-    list-style: none;
-    margin: 0 0 2.25rem;
-    padding: 0;
-  }
-  ul.services li {
-    padding: 0.55rem 0;
-    border-top: 1px solid var(--rule);
-    font-size: 0.98rem;
-  }
-  ul.services li:last-child {
-    border-bottom: 1px solid var(--rule);
-  }
-  .contact {
-    font-size: 0.98rem;
-  }
-  .contact a {
-    color: var(--accent);
-    text-decoration: none;
-    border-bottom: 1px solid var(--rule);
-  }
-  .contact a:hover {
-    border-bottom-color: var(--accent);
-  }
-  .contact div {
-    margin: 0.3rem 0;
-  }
-  footer {
-    margin-top: 3rem;
-    font-size: 0.8rem;
-    color: var(--muted);
-  }
-</style>
+
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://papa.onle.gs/">
+<meta property="og:title" content="Farouk Umar — Engineering Consultant">
+<meta property="og:description" content="Engineering consulting. Architecture, organisational health, and scaling systems and teams.">
+<meta property="og:image" content="https://papa.onle.gs/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="1200">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Farouk Umar — Engineering Consultant">
+<meta name="twitter:description" content="Engineering consulting. Architecture, organisational health, and scaling systems and teams.">
+<meta name="twitter:image" content="https://papa.onle.gs/og.jpg">
+
+<link rel="stylesheet" href="styles.css">
 </head>
 <body>
 <main>
-  <h1>Farouk Umar</h1>
+  <div class="identity">
+    <img class="avatar" src="farouk.jpg" alt="Farouk Umar" width="56" height="56">
+    <h1>Farouk Umar</h1>
+  </div>
   <p class="tagline">Engineering consultant — scaling systems, teams, and the discipline that holds them together.</p>
 
   <p class="intro">
@@ -107,6 +39,22 @@
     organisation-wide delivery. Available now for consulting engagements.
   </p>
 
+  <h2>How I can help</h2>
+  <ul class="services">
+    <li>
+      <strong>Vibe Code Auditing</strong>
+      <span class="desc">An honest review of AI-generated or rapidly-built codebases — what's solid, what's fragile, and what to fix before it ships.</span>
+    </li>
+    <li>
+      <strong>Fractional CTO</strong>
+      <span class="desc">Senior engineering leadership, part-time — strategy, architecture, hiring, and delivery, without a full-time hire.</span>
+    </li>
+    <li>
+      <strong>Forward Deployed</strong>
+      <span class="desc">Embedded with your team to build and ship the hard thing hands-on, then hand it over running.</span>
+    </li>
+  </ul>
+
   <h2>Services</h2>
   <ul class="services">
     <li>Agentic workflows</li>
@@ -114,6 +62,11 @@
     <li>Organisational design, delivery rhythm &amp; engineering culture</li>
     <li>Cost optimisation, infrastructure consolidation &amp; governance</li>
   </ul>
+
+  <h2>Book time</h2>
+  <p class="book">
+    <a class="button" data-calendly href="https://calendly.com/papaonlegs/30min">Book a call</a>
+  </p>
 
   <h2>Contact</h2>
   <div class="contact">
@@ -124,5 +77,6 @@
 
   <footer>London, UK &middot; open to remote</footer>
 </main>
+<script src="main.js" defer></script>
 </body>
 </html>

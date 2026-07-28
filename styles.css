@@ -1,0 +1,124 @@
+:root {
+  --bg: #fafafa;
+  --fg: #1a1a1a;
+  --muted: #666;
+  --rule: #ddd;
+  --accent: #1a1a1a;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #121212;
+    --fg: #eaeaea;
+    --muted: #999;
+    --rule: #2e2e2e;
+    --accent: #eaeaea;
+  }
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+main {
+  max-width: 38rem;
+  margin: 0 auto;
+  padding: 4.5rem 1.5rem 3rem;
+}
+.identity {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 0 0 0.15rem;
+}
+.avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+h1 {
+  font-size: 1.6rem;
+  font-weight: 600;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+.tagline {
+  font-size: 1.05rem;
+  color: var(--muted);
+  margin: 0 0 2.25rem;
+}
+p.intro {
+  font-size: 1rem;
+  margin: 0 0 2rem;
+}
+h2 {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  font-weight: 600;
+  margin: 0 0 0.9rem;
+}
+ul.services {
+  list-style: none;
+  margin: 0 0 2.25rem;
+  padding: 0;
+}
+ul.services li {
+  padding: 0.55rem 0;
+  border-top: 1px solid var(--rule);
+  font-size: 0.98rem;
+}
+ul.services li:last-child {
+  border-bottom: 1px solid var(--rule);
+}
+ul.services li strong {
+  font-weight: 600;
+}
+ul.services li span.desc {
+  display: block;
+  color: var(--muted);
+  font-size: 0.9rem;
+  margin-top: 0.15rem;
+}
+.book {
+  margin: 0 0 2.25rem;
+}
+.book a.button {
+  display: inline-block;
+  padding: 0.65rem 1.15rem;
+  border: 1px solid var(--fg);
+  border-radius: 0.35rem;
+  color: var(--fg);
+  text-decoration: none;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+.book a.button:hover {
+  background: var(--fg);
+  color: var(--bg);
+}
+.contact {
+  font-size: 0.98rem;
+}
+.contact a {
+  color: var(--accent);
+  text-decoration: none;
+  border-bottom: 1px solid var(--rule);
+}
+.contact a:hover {
+  border-bottom-color: var(--accent);
+}
+.contact div {
+  margin: 0.3rem 0;
+}
+footer {
+  margin-top: 3rem;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
