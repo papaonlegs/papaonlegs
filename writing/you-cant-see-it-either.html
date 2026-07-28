@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>8 — You didn't write it and you can't see it either — Farouk Umar</title>
+<meta name="description" content="Hand-written code you can't observe is survivable — you remember how it works. Generated code you can't observe is a locked room. Why observability isn't optional anymore.">
+
+<link rel="icon" type="image/svg+xml" href="images/eye-favicon.svg">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://papa.onle.gs/writing/you-cant-see-it-either.html">
+<meta property="og:title" content="8 — You didn't write it and you can't see it either">
+<meta property="og:description" content="Hand-written code you can't observe is survivable — you remember how it works. Generated code you can't observe is a locked room. Why observability isn't optional anymore.">
+<meta property="og:image" content="https://papa.onle.gs/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="1200">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="8 — You didn't write it and you can't see it either">
+<meta name="twitter:description" content="Hand-written code you can't observe is survivable — you remember how it works. Generated code you can't observe is a locked room. Why observability isn't optional anymore.">
+<meta name="twitter:image" content="https://papa.onle.gs/og.jpg">
+
+<link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+<main>
+  <a class="back" href="index.html">&larr; Writing</a>
+
+  <article class="prose">
+    <h1>8 — You didn't write it and you can't see it either</h1>
+    <p class="article-meta">Part of <em>10 reasons why your vibe coded app won't scale</em> &middot; Farouk Umar</p>
+
+    <p>
+      Hand-written code you can't observe well is survivable — you
+      remember how it works. Generated code you can't observe is a locked
+      room.
+    </p>
+
+    <p>
+      That's the actual argument, not "AI code has worse logging." With
+      code you wrote yourself, memory substitutes for telemetry — you
+      already have a rough model of where a request goes and what could go
+      wrong, so a missing log line is an inconvenience, not a dead end.
+      With generated code, you have neither the telemetry nor the memory.
+      You've given up the one thing that made thin observability tolerable
+      in the first place. Charity Majors' distinction between monitoring
+      and observability maps onto this exactly: monitoring answers
+      known-unknowns, the failure modes you already thought to watch for.
+      Observability answers unknown-unknowns. A vibe-coded app typically
+      has close to zero of both, because nobody ever sat down and asked
+      "what could go wrong here" — so nobody defined the questions
+      monitoring would need to answer.
+    </p>
+
+    <div class="diagram">
+      <img src="images/locked-room.svg" alt="Flowchart comparing a vibe-coded request path with no correlation ID, where each hop from browser to web app to API to database and Stripe is a dead end marked with question marks, against an instrumented path where a request ID is threaded through every hop as a span from browser to web to API to database and Stripe.">
+    </div>
+    <p class="diagram-caption">
+      Same five hops in both versions. One you can query in thirty seconds. The other you grep by hand for an hour.
+    </p>
+
+    <p>
+      This isn't a niche concern picked up by security researchers — it's
+      showing up in industry-wide data. DORA's 2025 report, drawing on
+      roughly 5,000 respondents, put it plainly: AI doesn't fix a team, it
+      amplifies what's already there. Teams adopting AI without
+      observability foundations already in place showed <em>increased</em>
+      delivery instability, not decreased. The comprehension gap behind
+      that is measurable too: debugging is the coding task most degraded
+      by AI assistance, and Stack Overflow's 2025 survey found developer
+      trust in AI-generated code fell from 40% to 29% even as usage
+      climbed to 84% — people are shipping more of it while trusting it
+      less, which is exactly the position you're in without visibility
+      into what it's actually doing in production.
+    </p>
+
+    <div class="diagram">
+      <img src="images/time-went.svg" alt="Sequence diagram: a checkout request flows from browser to web to API in 5ms, then the API selects inventory from the database, which takes 4200ms due to a missing index. The API then attempts a Stripe charge, which times out at 30 seconds and returns a 504, and the API returns a 500 to the browser — all tagged with the same request ID.">
+    </div>
+    <p class="diagram-caption">
+      Without a trace, this is "checkout is slow sometimes." With one, it's "missing index on inventory" — a five-minute fix instead of a five-day investigation.
+    </p>
+
+    <p>
+      Most incident time isn't spent fixing — it's spent finding, and
+      finding is exactly what observability shortens. Even companies whose
+      entire product is observability aren't immune to losing it: a
+      failsafe overcorrection in Cloudflare's own log pipeline lost 55% of
+      customer logs for three and a half hours in November 2024, leaving
+      customers blind at precisely the moment they needed to debug. If
+      Cloudflare can go dark for a few hours, a vibe-coded app that never
+      had the lights on to begin with isn't a special case — it's the
+      default.
+    </p>
+
+    <p>
+      The fix is an afternoon of work, not a platform migration:
+      structured JSON logs, a correlation ID minted at the edge and
+      threaded through every hop and log line, one distributed trace via
+      OpenTelemetry, error tracking so exceptions stop vanishing silently
+      into a caught exception, and one dashboard covering the four golden
+      signals — latency, traffic, errors, saturation.
+    </p>
+
+    <p>
+      If you've shipped fast with AI tools and want a second pair of eyes
+      before it goes further, that's exactly what a vibe code audit is for.
+    </p>
+
+    <p class="book">
+      <a class="button" data-calendly href="https://calendly.com/papaonlegs/30min">Book a call</a>
+    </p>
+
+    <div class="references">
+      <h2>References</h2>
+      <ol>
+        <li><a href="https://www.honeycomb.io/blog/observability-a-manifesto">Charity Majors / Honeycomb — Observability: A Manifesto</a></li>
+        <li><a href="https://sre.google/sre-book/monitoring-distributed-systems/">Google SRE Book — Monitoring Distributed Systems</a></li>
+        <li><a href="https://dora.dev/dora-report-2025/">DORA 2025 — State of AI-assisted Software Development</a></li>
+        <li><a href="https://opentelemetry.io/docs/concepts/context-propagation/">OpenTelemetry — context propagation</a></li>
+        <li><a href="https://blog.cloudflare.com/cloudflare-incident-on-november-14-2024-resulting-in-lost-logs/">Cloudflare — 14 November 2024 lost-logs incident</a></li>
+      </ol>
+    </div>
+  </article>
+</main>
+<script src="../main.js" defer></script>
+</body>
+</html>
