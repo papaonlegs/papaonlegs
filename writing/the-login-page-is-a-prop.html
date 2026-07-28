@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3 — The login page is a prop — Farouk Umar</title>
+<meta name="description" content="Your app demos perfectly because the demo only tests the path a human clicks. Attackers don't click. They curl. Why vibe-coded auth keeps failing at the API, not the UI.">
+
+<link rel="icon" type="image/svg+xml" href="images/lock-favicon.svg">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://papa.onle.gs/writing/the-login-page-is-a-prop.html">
+<meta property="og:title" content="3 — The login page is a prop">
+<meta property="og:description" content="Your app demos perfectly because the demo only tests the path a human clicks. Attackers don't click. They curl. Why vibe-coded auth keeps failing at the API, not the UI.">
+<meta property="og:image" content="https://papa.onle.gs/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="1200">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="3 — The login page is a prop">
+<meta name="twitter:description" content="Your app demos perfectly because the demo only tests the path a human clicks. Attackers don't click. They curl. Why vibe-coded auth keeps failing at the API, not the UI.">
+<meta name="twitter:image" content="https://papa.onle.gs/og.jpg">
+
+<link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+<main>
+  <a class="back" href="index.html">&larr; Writing</a>
+
+  <article class="prose">
+    <h1>3 — The login page is a prop</h1>
+    <p class="article-meta">Part of <em>10 reasons why your vibe coded app won't scale</em> &middot; Farouk Umar</p>
+
+    <p>
+      Your app demos perfectly, because the demo only ever tests the path
+      a human clicks. Attackers don't click. They curl.
+    </p>
+
+    <p>
+      Look at almost any named vibe-coding security incident and the same
+      pattern shows up: session logic the AI never generated, or generated
+      client-side only; secrets shipped in code; storage or database
+      access simply left open. "It's just an MVP" is the load-bearing lie
+      behind all of them — every incident below started as a prototype
+      that got real user data before anyone came back to revisit auth.
+    </p>
+
+    <div class="diagram">
+      <img src="images/auth-boundary.svg" alt="Flowchart showing a React client with a login form and client-side route guard rendering a dashboard, which fetches /api/account and /api/billing. An attacker using curl with no UI hits /api/account and /api/admin/users directly with no token — both return data because there's no server-side check, while /api/billing correctly verifies the JWT and role server-side.">
+    </div>
+    <p class="diagram-caption">
+      The login form and the route guard are real UI. The API underneath
+      never asks who's calling — and attackers never load the page at all.
+    </p>
+
+    <p>
+      This isn't a hunch about AI-generated code being a bit worse at
+      security — it's measured, and the sharpest edge is a Stanford study
+      that found developers using AI assistants wrote <em>less</em> secure
+      code while being <em>more</em> confident it was secure. Veracode's
+      2025 report found 45% of AI-generated code samples failed security
+      tests outright — Java the worst at 72%, XSS defences failing 86% of
+      the time. BaxBench found roughly half of functionally-correct
+      AI-generated backends contained an exploitable vulnerability
+      alongside working functionality.
+    </p>
+
+    <p>
+      The specific sins repeat: hardcoded JWT secrets, tokens with no
+      expiry and no revocation path, a "logout" that only deletes a token
+      from <code>localStorage</code> on the client, password rules from
+      2005, OTP endpoints anyone can call. The Tea app exposed roughly
+      72,000 images from an unauthenticated Firebase Storage bucket in
+      July 2025 — including around 13,000 verification selfies and
+      government IDs — with researchers attributing the code to AI
+      generation that was never audited. Wiz Research found Base44's
+      registration and OTP-verification endpoints had no authentication at
+      all that same month: since the app ID was public, anyone could
+      self-register a verified account inside a private enterprise app,
+      bypassing SSO entirely. It was fixed within 24 hours of disclosure —
+      which tells you the fix wasn't hard, just never attempted. Escape.tech's
+      scan of 5,600 vibe-coded apps found over 2,000 high-impact
+      vulnerabilities and 400+ exposed secrets, live in production.
+    </p>
+
+    <div class="diagram">
+      <img src="images/immortal-token.svg" alt="Sequence diagram: user logs in and receives a JWT with no expiry claim and a hardcoded secret. The user clicks logout, but the client only deletes the token from localStorage. Six months later, the leaked token is still accepted by the server with a 200 OK, since there's no expiry or revocation list.">
+    </div>
+    <p class="diagram-caption">
+      Logout deleted the token from the browser. The server never heard about it.
+    </p>
+
+    <p>
+      The fix is almost anticlimactic: don't roll your own auth. Managed
+      auth — Auth0, Clerk, Supabase Auth, Cognito — exists to own password
+      hashing, token lifecycle, revocation, MFA, and brute-force
+      protection, for the same reason you don't write your own crypto
+      library. If you're using JWTs regardless, follow the OWASP cheat
+      sheet: short expiry, refresh-token rotation, and server-side
+      revocation that actually gets checked.
+    </p>
+
+    <p>
+      If you've shipped fast with AI tools and want a second pair of eyes
+      before it goes further, that's exactly what a vibe code audit is for.
+    </p>
+
+    <p class="book">
+      <a class="button" data-calendly href="https://calendly.com/papaonlegs/30min">Book a call</a>
+    </p>
+
+    <div class="references">
+      <h2>References</h2>
+      <ol>
+        <li><a href="https://owasp.org/Top10/2021/A07_2021-Identification_and_Authentication_Failures/">OWASP A07:2021 — Identification &amp; Authentication Failures</a></li>
+        <li><a href="https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html">OWASP Authentication Cheat Sheet</a></li>
+        <li><a href="https://cheatsheetseries.owasp.org/cheatsheets/JSON_Web_Token_Cheat_Sheet.html">OWASP JWT Cheat Sheet</a></li>
+        <li><a href="https://www.veracode.com/blog/genai-code-security-report/">Veracode — 2025 GenAI Code Security Report</a></li>
+        <li><a href="https://arxiv.org/abs/2502.11844">BaxBench</a></li>
+        <li><a href="https://arxiv.org/abs/2211.03622">Perry et al. — Do Users Write More Insecure Code with AI Assistants?</a></li>
+        <li><a href="https://www.wiz.io/blog/critical-vulnerability-base44">Wiz Research — Base44</a></li>
+      </ol>
+    </div>
+  </article>
+</main>
+<script src="../main.js" defer></script>
+</body>
+</html>
