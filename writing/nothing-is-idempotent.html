@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>6 — Nothing is idempotent and everything runs twice — Farouk Umar</title>
+<meta name="description" content="The happy path is the only path your app was written for. At scale, the happy path is the rare one — and every retry your infrastructure sends is a duplicate waiting to happen.">
+
+<link rel="icon" type="image/svg+xml" href="images/duplicate-favicon.svg">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://papa.onle.gs/writing/nothing-is-idempotent.html">
+<meta property="og:title" content="6 — Nothing is idempotent and everything runs twice">
+<meta property="og:description" content="The happy path is the only path your app was written for. At scale, the happy path is the rare one — and every retry your infrastructure sends is a duplicate waiting to happen.">
+<meta property="og:image" content="https://papa.onle.gs/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="1200">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="6 — Nothing is idempotent and everything runs twice">
+<meta name="twitter:description" content="The happy path is the only path your app was written for. At scale, the happy path is the rare one — and every retry your infrastructure sends is a duplicate waiting to happen.">
+<meta name="twitter:image" content="https://papa.onle.gs/og.jpg">
+
+<link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+<main>
+  <a class="back" href="index.html">&larr; Writing</a>
+
+  <article class="prose">
+    <h1>6 — Nothing is idempotent and everything runs twice</h1>
+    <p class="article-meta">Part of <em>10 reasons why your vibe coded app won't scale</em> &middot; Farouk Umar</p>
+
+    <p>
+      The happy path is the only path your app was written for. At scale,
+      the happy path is the rare one.
+    </p>
+
+    <p>
+      Exactly-once delivery isn't an engineering gap you can close with
+      enough effort — it's a theorem. The Two Generals problem makes it
+      provably impossible over an unreliable network, and every mainstream
+      system you're already using has made its peace with that: SQS,
+      Kafka's defaults, every webhook provider, every browser's retry
+      behaviour all choose at-least-once delivery instead. Duplicates
+      aren't a bug in that infrastructure — they're documented, intended
+      behaviour. The bug is code that was never written to expect them.
+      Four paths produce duplicates in almost every vibe-coded CRUD or
+      payments app: queue redelivery, webhook retries, a load balancer or
+      client timing out mid-write, and a user double-clicking submit.
+    </p>
+
+    <div class="diagram">
+      <img src="images/timeout-retry.svg" alt="Sequence diagram: a user posts a $50 charge, the load balancer forwards it, the API charges the card successfully, but the response is too slow and the load balancer times out before the user sees it. The user retries the same charge, the load balancer forwards a fresh attempt, and the API charges the card again — the card is charged twice for one order.">
+    </div>
+    <p class="diagram-caption">
+      The charge succeeded the first time. The timeout just happened after that, not because of it.
+    </p>
+
+    <p>
+      There's a specific, well-measured reason generated code misses this:
+      a robustness study found 43.1% of LLM-generated code is less robust
+      than the equivalent human-written reference code, with over 90% of
+      that gap coming from missing guard checks — and 70% of the omissions
+      sitting on the very first line where the check belonged. The most
+      telling detail in that research: in 63–69% of the missed cases, the
+      model's own token probabilities had ranked the missing
+      <code>if</code> statement in its top three choices. It wasn't that
+      the model didn't know the check belonged there. It skipped it
+      anyway. And the scale of who needs this: Stripe itself ships an
+      idempotency-key mechanism specifically to survive retries from its
+      own SDK. If a payments company at their scale needs that layer, your
+      MVP calling their API without one hasn't avoided the problem — it
+      just hasn't met it yet.
+    </p>
+
+    <div class="diagram">
+      <img src="images/idempotency-key.svg" alt="Sequence diagram: a user posts a charge with an idempotency key, the API checks the key isn't in use, locks it, charges the card, and saves the response. The client never sees the response due to a timeout and retries with the same key — this time the API finds the key already finished and replays the cached response instead of charging the card again.">
+    </div>
+    <p class="diagram-caption">
+      Same timeout, same retry. The second request finds a finished key and replays the result instead of repeating the charge.
+    </p>
+
+    <p>
+      Retry windows aren't a corner case either — they're the vendor's
+      documented default behaviour. Stripe retries webhooks for up to 3
+      days. Shopify retries 8 times over 4 hours. GitHub retries 3 times
+      within an hour and requires a 2xx response within 10 seconds — which
+      means even a handler that's merely slow but ultimately successful
+      still triggers a duplicate delivery. This isn't hypothetical at any
+      scale, either: publicly reported duplicate-transaction incidents at
+      Chase, Commonwealth Bank Australia, and NBT Bank all involved
+      ordinary retry behaviour meeting no deduplication backstop, not an
+      attacker. If banks ship this bug under that much scrutiny, an MVP
+      calling a payment processor for the first time will too, unless it's
+      designed not to.
+    </p>
+
+    <div class="diagram">
+      <img src="images/unique-constraint.svg" alt="Flowchart: a webhook with event_id evt_123 attempts an insert into processed_events with a unique constraint on event_id. If the constraint is violated, the event is already processed and the handler returns 200 with no action. If the insert succeeds, the handler processes the event — charge, email, update — and returns 200.">
+    </div>
+    <p class="diagram-caption">
+      The unique constraint is the backstop for when application logic eventually lets a duplicate through — because it will.
+    </p>
+
+    <p>
+      The fix is idempotency keys on every write endpoint — client-supplied
+      or derived from the event ID — plus a unique constraint in the
+      database as the last line of defence, because application logic will
+      eventually let one through on its own. Design every handler as if it
+      will run twice. It will.
+    </p>
+
+    <p>
+      If you've shipped fast with AI tools and want a second pair of eyes
+      before it goes further, that's exactly what a vibe code audit is for.
+    </p>
+
+    <p class="book">
+      <a class="button" data-calendly href="https://calendly.com/papaonlegs/30min">Book a call</a>
+    </p>
+
+    <div class="references">
+      <h2>References</h2>
+      <ol>
+        <li><a href="https://docs.stripe.com/api/idempotent_requests">Stripe — idempotent requests</a></li>
+        <li><a href="https://brandur.org/idempotency-keys">Brandur Leach — idempotency keys in Postgres</a></li>
+        <li><a href="https://bravenewgeek.com/you-cannot-have-exactly-once-delivery/">Tyler Treat — You Cannot Have Exactly-Once Delivery</a></li>
+        <li><a href="https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/standard-queues-at-least-once-delivery.html">AWS SQS — at-least-once delivery</a></li>
+        <li><a href="https://arxiv.org/abs/2503.20197">LLM code robustness study</a></li>
+        <li><a href="https://docs.github.com/en/webhooks/using-webhooks/handling-webhook-deliveries">GitHub — webhook delivery docs</a></li>
+      </ol>
+    </div>
+  </article>
+</main>
+<script src="../main.js" defer></script>
+</body>
+</html>
