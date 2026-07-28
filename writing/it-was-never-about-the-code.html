@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>It was never about the code — Farouk Umar</title>
+<meta name="description" content="Not one of these ten is an AI problem. Every one is what happens when software gets written without anyone making a decision. The series summary, and a ten-question pre-scale checklist.">
+
+<link rel="icon" type="image/svg+xml" href="images/checklist-favicon.svg">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://papa.onle.gs/writing/it-was-never-about-the-code.html">
+<meta property="og:title" content="It was never about the code">
+<meta property="og:description" content="Not one of these ten is an AI problem. Every one is what happens when software gets written without anyone making a decision. The series summary, and a ten-question pre-scale checklist.">
+<meta property="og:image" content="https://papa.onle.gs/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="1200">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="It was never about the code">
+<meta name="twitter:description" content="Not one of these ten is an AI problem. Every one is what happens when software gets written without anyone making a decision. The series summary, and a ten-question pre-scale checklist.">
+<meta name="twitter:image" content="https://papa.onle.gs/og.jpg">
+
+<link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+<main>
+  <a class="back" href="index.html">&larr; Writing</a>
+
+  <article class="prose">
+    <h1>It was never about the code</h1>
+    <p class="article-meta">Summary — <em>10 reasons why your vibe coded app won't scale</em> &middot; Farouk Umar</p>
+
+    <p>
+      Not one of the ten reasons in this series is an AI problem. Every
+      one is what happens when software gets written without anyone
+      making a decision. Vibe coding didn't invent these failures — it
+      removed the friction that used to force you to confront them.
+      Typing the code slowly was never the value. Being made to think
+      while you typed was.
+    </p>
+
+    <h3>The ten, one line each</h3>
+    <ul>
+      <li><strong>1 — Six data models, one user.</strong> Every prompt invents its own domain model, because nothing persists the last one.</li>
+      <li><strong>2 — 40ms locally, 40 seconds in production.</strong> Small test data hides every N+1 query until real traffic finds it.</li>
+      <li><strong>3 — The login page is a prop.</strong> Auth built for the UI a human clicks, not the API an attacker curls.</li>
+      <li><strong>4 — Authorisation is a vibe.</strong> Forty handlers, forty interpretations of who's allowed — and RLS never turned on.</li>
+      <li><strong>5 — Your frontend talks straight to the database.</strong> Every secret in the client bundle is a secret an attacker can read.</li>
+      <li><strong>6 — Nothing is idempotent.</strong> Retries are infrastructure's default behaviour; duplicate handling was never built for them.</li>
+      <li><strong>7 — It works on one box.</strong> State that lives in memory disagrees with itself the moment a second instance exists.</li>
+      <li><strong>8 — You can't see it either.</strong> No memory of writing it, no telemetry to replace that memory.</li>
+      <li><strong>9 — Profitable at 100, bankrupt at 10,000.</strong> Flat pricing meets a cost curve that scales with usage, not revenue.</li>
+      <li><strong>10 — The bus factor is zero.</strong> The theory of the system lived in a prompt, and the prompt is gone.</li>
+    </ul>
+
+    <p>
+      The pattern underneath all ten is the same: every item is a deferred
+      decision. Deferred decisions accrue interest quietly, the way
+      unaddressed technical debt always has — and scale is simply the
+      moment the loan gets called in. None of this is new to software.
+      What's new is the volume: it's now possible to defer a year's worth
+      of these decisions in an afternoon, faster than any team can review
+      them.
+    </p>
+
+    <p>
+      The honest counterweight has to be genuine here, or the whole series
+      reads as a sneer at a genuinely useful way of building. The speed is
+      real. Most projects die from never shipping at all, not from
+      scaling badly — a fast, ugly path to a working product beats a slow,
+      clean path to nothing every time. The error isn't using these tools.
+      It's treating speed and leverage as the same thing, when they're
+      not: speed gets you to a working version faster; leverage is what
+      determines whether that version survives contact with real users.
+    </p>
+
+    <p>
+      The practical split is between decisions that must be
+      <strong>authored</strong> — by a person, deliberately, in one place —
+      and everything that can safely be <strong>generated</strong>. The
+      authored list is short and specific: the domain model, the auth
+      model, the authorisation policy, the trust boundary between client
+      and server, the idempotency strategy, the migration strategy, the
+      cost model. Almost everything else — the CRUD handlers, the UI, the
+      routine glue code — is exactly what these tools are good at, and
+      generating it is not the mistake. The mistake is letting the short
+      list get generated by default because nobody stopped to notice it
+      was on the list at all.
+    </p>
+
+    <p>
+      Ten questions, one per post, worth running through before anything
+      you've built this way meets real traffic:
+    </p>
+
+    <blockquote>
+      <ol>
+        <li>Can you say, in one place, what a "user" is — and is it the only place?</li>
+        <li>Do you know how many queries your busiest endpoint makes per request?</li>
+        <li>If a session token leaked today, could you revoke it?</li>
+        <li>Can you show the policy that decides who sees what — without grepping handlers? Is RLS on?</li>
+        <li>What can an attacker reach with nothing but the keys in your JS bundle?</li>
+        <li>What happens when your payment webhook is delivered twice?</li>
+        <li>What breaks when you go from one instance to two?</li>
+        <li>Can you follow a single user's request across your whole system by one ID?</li>
+        <li>What does one request cost you — and who can make 10,000 of them?</li>
+        <li>Can you explain how it works? Then why did you merge it?</li>
+      </ol>
+    </blockquote>
+
+    <p>
+      If you've shipped fast with AI tools and want a second pair of eyes
+      before it goes further, that's exactly what a vibe code audit is for.
+    </p>
+
+    <p class="book">
+      <a class="button" data-calendly href="https://calendly.com/papaonlegs/30min">Book a call</a>
+    </p>
+
+    <div class="references">
+      <h2>The series</h2>
+      <ol>
+        <li><a href="you-have-six-data-models.html">1 — You have six data models and you think you have one</a></li>
+        <li><a href="40ms-locally-40-seconds-in-production.html">2 — 40ms locally, 40 seconds in production</a></li>
+        <li><a href="the-login-page-is-a-prop.html">3 — The login page is a prop</a></li>
+        <li><a href="authorisation-is-a-vibe.html">4 — Authorisation is a vibe</a></li>
+        <li><a href="your-frontend-talks-to-the-database.html">5 — Your frontend talks straight to the database</a></li>
+        <li><a href="nothing-is-idempotent.html">6 — Nothing is idempotent and everything runs twice</a></li>
+        <li><a href="it-works-on-one-box.html">7 — It works on one box, and that's the whole problem</a></li>
+        <li><a href="you-cant-see-it-either.html">8 — You didn't write it and you can't see it either</a></li>
+        <li><a href="profitable-at-100-bankrupt-at-10000.html">9 — Profitable at 100 users, bankrupt at 10,000</a></li>
+        <li><a href="the-bus-factor-is-zero.html">10 — The bus factor isn't one, it's zero</a></li>
+      </ol>
+    </div>
+  </article>
+</main>
+<script src="../main.js" defer></script>
+</body>
+</html>
