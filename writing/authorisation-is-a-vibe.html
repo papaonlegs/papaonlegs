@@ -38,13 +38,25 @@
     </p>
 
     <p>
+      I know this one from the inside, not from a write-up. I'd vibe-coded
+      a concept app on Lovable to demo to a handful of potential clients —
+      each with their own seeded dummy data, so every demo would look
+      tailored to them. Then one client's login pulled up dummy invoices
+      that belonged to somebody else's dummy company. Nothing real was at
+      risk, because the data on both sides was fake. But the query that
+      surfaced it was completely real, and so was the missing predicate
+      behind it.
+    </p>
+
+    <p>
       Authorisation generated one handler at a time means forty endpoints
       with forty separate interpretations of who's allowed to do what, and
       no policy anyone could actually read end to end. "Who can see this?"
       becomes a question you can only answer by grepping the codebase. The
       multi-tenant version is worse: one missing <code>WHERE org_id = ?</code>
-      isn't a bug, it's a data disclosure — and it's invisible in the demo,
-      because the founder is the only row in the table.
+      isn't a bug, it's a data disclosure — usually invisible in the demo,
+      because the founder is the only row in the table. I got lucky: mine
+      had two.
     </p>
 
     <div class="diagram">
