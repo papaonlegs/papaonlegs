@@ -38,41 +38,35 @@
     </p>
 
     <p>
-      That's the actual argument, not "AI code has worse logging." With
-      code you wrote yourself, memory substitutes for telemetry — you
-      already have a rough model of where a request goes and what could go
-      wrong, so a missing log line is an inconvenience, not a dead end.
-      With generated code, you have neither the telemetry nor the memory.
-      You've given up the one thing that made thin observability tolerable
-      in the first place. Charity Majors' distinction between monitoring
-      and observability maps onto this exactly: monitoring answers
-      known-unknowns, the failure modes you already thought to watch for.
-      Observability answers unknown-unknowns. A vibe-coded app typically
-      has close to zero of both, because nobody ever sat down and asked
-      "what could go wrong here" — so nobody defined the questions
-      monitoring would need to answer.
+      "AI code has worse logging." isn't necessarily true, it's just
+      harder to observe. With code you wrote yourself, memory substitutes
+      for telemetry — you already have a rough model of where a request
+      goes and what could go wrong, so a missing log line is an
+      inconvenience, not a dead end. With generated code, you have neither
+      the telemetry nor the memory - It's a black (grey?) box. You've
+      given up the one thing that made thin observability tolerable in
+      the first place. Monitoring answers known-unknowns, the failure
+      modes you already thought to watch for. Observability answers
+      unknown-unknowns. A vibe-coded app typically has close to zero of
+      both, because people rarely ask "what could go wrong here" — so
+      nobody defined the questions monitoring would need to answer.
     </p>
 
     <div class="diagram">
       <img src="images/locked-room.svg" alt="Flowchart comparing a vibe-coded request path with no correlation ID, where each hop from browser to web app to API to database and Stripe is a dead end marked with question marks, against an instrumented path where a request ID is threaded through every hop as a span from browser to web to API to database and Stripe.">
     </div>
     <p class="diagram-caption">
-      Same five hops in both versions. One you can query in thirty seconds. The other you grep by hand for an hour.
+      Same four hops in both versions. One you can query in thirty seconds. The other you grep by hand for an hour.
     </p>
 
     <p>
-      This isn't a niche concern picked up by security researchers — it's
-      showing up in industry-wide data. DORA's 2025 report, drawing on
-      roughly 5,000 respondents, put it plainly: AI doesn't fix a team, it
-      amplifies what's already there. Teams adopting AI without
-      observability foundations already in place showed <em>increased</em>
-      delivery instability, not decreased. The comprehension gap behind
-      that is measurable too: debugging is the coding task most degraded
-      by AI assistance, and Stack Overflow's 2025 survey found developer
-      trust in AI-generated code fell from 40% to 29% even as usage
-      climbed to 84% — people are shipping more of it while trusting it
-      less, which is exactly the position you're in without visibility
-      into what it's actually doing in production.
+      Observability needs to be thought through ahead of time across your
+      whole topology and embedded in your plan. Debugging is already
+      becoming the task most degraded by AI assistance, and trust in
+      AI-generated code is falling as usage is climbing - people are
+      shipping more with AI while trusting it less, which is exactly the
+      position you're in when you don't have visibility into what it's
+      actually doing in production.
     </p>
 
     <div class="diagram">
@@ -97,10 +91,17 @@
     <p>
       The fix is an afternoon of work, not a platform migration:
       structured JSON logs, a correlation ID minted at the edge and
-      threaded through every hop and log line, one distributed trace via
-      OpenTelemetry, error tracking so exceptions stop vanishing silently
-      into a caught exception, and one dashboard covering the four golden
+      threaded through every hop and log line, one distributed trace
+      (via OpenTelemetry?), error tracking so exceptions stop vanishing
+      silently, and one dashboard covering your fundamental
       signals — latency, traffic, errors, saturation.
+    </p>
+
+    <p>
+      None of this matters if nobody looks at it. Wiring up the telemetry
+      is necessary but not sufficient — build in a reasonable cadence for
+      actually reviewing these metrics, not just pulling them up after
+      something's already on fire.
     </p>
 
     <p>
