@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>9 — Profitable at 100 users, bankrupt at 10,000 — Farouk Umar</title>
-<meta name="description" content="Nobody asked what happens when someone calls this 10,000 times. Two invoices arrive for that question: the attacker's, and the cloud provider's.">
+<meta name="description" content="What happens when someone calls this 10,000 times? Two invoices arrive for that question: the attacker's, and the cloud provider's.">
 
 <link rel="icon" type="image/svg+xml" href="images/dollar-favicon.svg">
 <link rel="apple-touch-icon" href="../apple-touch-icon.png">
@@ -12,13 +12,13 @@
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://papa.onle.gs/writing/profitable-at-100-bankrupt-at-10000.html">
 <meta property="og:title" content="9 — Profitable at 100 users, bankrupt at 10,000">
-<meta property="og:description" content="Nobody asked what happens when someone calls this 10,000 times. Two invoices arrive for that question: the attacker's, and the cloud provider's.">
+<meta property="og:description" content="What happens when someone calls this 10,000 times? Two invoices arrive for that question: the attacker's, and the cloud provider's.">
 <meta property="og:image" content="https://papa.onle.gs/og.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="1200">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="9 — Profitable at 100 users, bankrupt at 10,000">
-<meta name="twitter:description" content="Nobody asked what happens when someone calls this 10,000 times. Two invoices arrive for that question: the attacker's, and the cloud provider's.">
+<meta name="twitter:description" content="What happens when someone calls this 10,000 times? Two invoices arrive for that question: the attacker's, and the cloud provider's.">
 <meta name="twitter:image" content="https://papa.onle.gs/og.jpg">
 
 <link rel="stylesheet" href="../styles.css">
@@ -32,7 +32,7 @@
     <p class="article-meta">Part of <em>10 reasons why your vibe coded app won't scale</em> &middot; Farouk Umar</p>
 
     <p>
-      Nobody asked what happens when someone calls this 10,000 times. Two
+      What happens when someone calls this 10,000 times? Two
       invoices arrive for that question: the attacker's, and the cloud
       provider's.
     </p>
@@ -41,10 +41,8 @@
       There are two failure modes here and one root cause. No rate
       limiting invites abuse; no cost model invites an organic cost
       inversion. Both exist because "what if someone hammers this
-      endpoint?" never made it into the prompt. OWASP names the abuse side
-      directly — API4:2023, Unrestricted Resource Consumption — and the
-      mechanics are boringly simple: exposed keys, no per-user or per-IP
-      throttle, a paywall enforced only in client-side code. Traction is
+      endpoint?" was not included in the prompt. The mechanics are
+      simple: exposed keys, no throttling, client-side gating. Traction is
       usually the trigger. The same virality that should read as a growth
       win instead reads as "I'm under attack," because nothing was built
       to tell the difference between a thousand real signups and one
@@ -61,24 +59,28 @@
     <p>
       Spending caps aren't rate limits — billing enforcement lags real-time
       usage, so a cap is reactive where a limiter is preventive, and you
-      need both plus a budget alert that actually pages someone. One
-      widely reported case had a Google Cloud customer wake up to an
-      $18,000-plus bill despite a $1,400 spending cap, because an attacker
-      put through 60,000 requests before the cap caught up. Denial-of-Wallet
-      is the LLM-era version of a denial-of-service attack: no data is
-      stolen, your own paid API access is the weapon. Sysdig's research
-      into "LLMjacking" — stolen cloud credentials used to drive an LLM at
-      maximum quota — modelled the cost at $46,000 a day on older Claude
-      pricing and over $100,000 a day at Claude 3 Opus-era rates.
+      need both plus a budget alert that actually pages someone. I've been
+      on both ends of that lag myself: a surprise bill that arrived well
+      after the spending was already done, and separately, a mid-month
+      budget alert that had me pulling the team off everything else to get
+      on top of it before it became the surprise bill. You often hear
+      people complain about a bill landing far above the cap they'd set,
+      and that's exactly why — there's a lag between the event that burns
+      the credit and the bill for the credit itself. Denial-of-Wallet is
+      the new Denial-of-Service.
     </p>
 
     <p>
-      The clearest documented case of this happening organically, no
-      attacker required, is a builder who shared his timeline in public:
-      on 15 March 2025 he tweeted his Cursor-built SaaS, "zero hand written
-      code." Two days later: "guys, i'm under attack... maxed out usage on
-      api keys, people bypassing the subscription, creating random shit on
-      db." By 20 March, he'd shut it down and rebuilt on a no-code
+      I've used this example before, in the post on
+      <a href="your-frontend-talks-to-the-database.html">your frontend
+      talking straight to the database</a> — it's worth returning to here
+      because it's as much a cost story as a security one. On
+      <a href="https://x.com/leojr94_/status/1900767509621674109">15 March
+      2025</a> the builder announced "zero hand written code." By
+      <a href="https://x.com/leojr94_/status/1901560276488511759">17
+      March</a>: "guys, i'm under attack" — maxed-out API keys, the
+      subscription paywall bypassed, junk writes hitting the database. On
+      20 March he gave up on the vibe-coded app in favour of a no-code
       platform. It's simultaneously a security story and a unit-economics
       story — a maxed-out key is someone else's usage landing on your
       bill, whether they're an attacker or just a heavier user than your
@@ -93,9 +95,9 @@
     </p>
 
     <p>
-      This is the failure mode a CFO can actually see, which is exactly
-      what makes it the one that ends a project rather than just
-      embarrassing an engineer. SaaS-era pricing instincts — a flat $9 a
+      AI can't see this failure mode coming, and it won't tell you to
+      kill the project before the bill does — it'll happily let you
+      embarrass yourself instead. SaaS-era pricing instincts — a flat $9 a
       month — meet an AI-era cost curve where every request has a real,
       variable marginal cost, and a16z's research puts AI-native gross
       margins at 50–60% against 60–80%-plus for traditional SaaS, with
@@ -104,15 +106,9 @@
     </p>
 
     <p>
-      The fixes are solved territory, not research problems: token-bucket
-      or sliding-window rate limiting — Cloudflare's production limiter
-      runs at a 0.003% error rate across 400 million requests — tiered
-      limits like GitHub's (60/hour unauthenticated versus 5,000/hour
-      authenticated), prompt caching for roughly 90% savings on repeated
-      context, semantic caching (one documented case took a bill from
-      $47k/month to $12.7k/month), routing cheap work to cheap models, and
-      treating cost-per-request as a first-class metric sitting right next
-      to p99 latency.
+      This is a well-solved software engineering problem: rate limiting,
+      windowing, tiering, and treating cost-per-request as much of a
+      metric as latency.
     </p>
 
     <p>
