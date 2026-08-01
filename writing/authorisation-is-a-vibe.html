@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>4 — Authorisation is a vibe — Farouk Umar</title>
+<meta name="description" content="Every endpoint in your app checks permissions. No two check them the same way. And Row Level Security was never turned on. The Lovable curse, explained.">
+
+<link rel="icon" type="image/svg+xml" href="images/shield-favicon.svg">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://papa.onle.gs/writing/authorisation-is-a-vibe.html">
+<meta property="og:title" content="4 — Authorisation is a vibe">
+<meta property="og:description" content="Every endpoint in your app checks permissions. No two check them the same way. And Row Level Security was never turned on. The Lovable curse, explained.">
+<meta property="og:image" content="https://papa.onle.gs/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="1200">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="4 — Authorisation is a vibe">
+<meta name="twitter:description" content="Every endpoint in your app checks permissions. No two check them the same way. And Row Level Security was never turned on. The Lovable curse, explained.">
+<meta name="twitter:image" content="https://papa.onle.gs/og.jpg">
+
+<link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+<main>
+  <a class="back" href="index.html">&larr; Writing</a>
+
+  <article class="prose">
+    <h1>4 — Authorisation is a vibe</h1>
+    <p class="article-meta">Part of <em>10 reasons why your vibe coded app won't scale</em> &middot; Farouk Umar</p>
+
+    <p>
+      Every endpoint in your app checks permissions. No two of them check
+      permissions the same way. And on the table that actually matters,
+      Row Level Security was never turned on.
+    </p>
+
+    <p>
+      I know this one from the inside, not from a write-up. I'd vibe-coded
+      a concept app on Lovable to demo to a handful of potential clients —
+      each with their own seeded dummy data, so every demo would look
+      tailored to them. Then one client's login pulled up a dummy itinerary
+      that belonged to somebody else's dummy airline. Nothing real was at
+      risk, because the data on both sides was fake. But the query that
+      surfaced it was completely real, and so was the missing predicate
+      behind it.
+    </p>
+
+    <p>
+      Authorisation generated one handler at a time means forty endpoints
+      with forty separate interpretations of who's allowed to do what, and
+      no policy anyone could actually read end to end. "Who can see this?"
+      becomes a question you can only answer by grepping the codebase. The
+      multi-tenant version is worse: one missing <code>WHERE org_id = ?</code>
+      isn't a bug, it's a data disclosure — usually invisible in the demo,
+      because the founder is the only row in the table. I got lucky: mine
+      had two.
+    </p>
+
+    <div class="diagram">
+      <img src="images/forty-checks.svg" alt="Flowchart comparing vibe-coded authorisation, where GET /invoices/:id and DELETE /invoices/:id have missing or wrong checks while other handlers are fine, against a single policy layer that every request passes through with deny-by-default.">
+    </div>
+    <p class="diagram-caption">
+      One of these can be shown to an auditor. The other can only be read, handler by handler.
+    </p>
+
+    <p>
+      Supabase and Postgres make this sharper than most stacks, because
+      Row Level Security is <em>opt-in</em>: the anon key is public by
+      design, and RLS is the only thing standing between that key and the
+      whole database. Vibe-coded apps ship with it off, or with a
+      placeholder <code>USING (true)</code> policy, because that's what
+      makes the demo work on the first try. The flagship story here is
+      CVE-2025-48757 — what researchers started calling "the Lovable
+      curse." Matt Palmer and Kody Low found it in March 2025 via a
+      Lovable-built app; a scan of 1,645 public Lovable apps turned up 303
+      vulnerable endpoints across 170 projects, a 10.3% hit rate, CVSS 9.3,
+      unauthenticated read and write access to emails, addresses, payment
+      details, and API keys. The telling detail is the remediation:
+      Lovable's fix was a scanner that checked whether <em>a</em> policy
+      existed on a table, not whether the policy was correct — a checklist
+      bolted on where a policy layer should have been.
+    </p>
+
+    <div class="diagram">
+      <img src="images/missing-where.svg" alt="Flowchart: a query for invoices WHERE id = 42, with no org_id predicate and RLS off, returns row 42 from a table containing rows from multiple organisations — no matter which org actually asked.">
+    </div>
+    <p class="diagram-caption">
+      One missing predicate, and the query can't tell your organisation from anyone else's.
+    </p>
+
+    <p>
+      This is worth taking seriously even without the AI angle: OWASP has
+      ranked Broken Access Control the #1 web risk since 2021, found in
+      94% of tested applications, with more occurrences than any other
+      category by a wide margin. Vibe coding doesn't invent this risk —
+      it ships it faster and hides it better, because nobody had to
+      consciously decide to skip the check; it was simply never generated.
+      There's a compliance angle too, worth naming from the regtech side:
+      a SOC 2 auditor asks for the access-control <em>policy</em> and
+      evidence it's enforced. A policy engine or a coherent set of RLS
+      rules is something you can hand over, diff, and test. Forty inline
+      <code>if</code> statements scattered across handlers is an
+      archaeology project, not an artifact.
+    </p>
+
+    <p>
+      The fix is one policy layer, deny by default, tested independently
+      of any feature. Handlers ask the policy what's allowed — they never
+      decide it themselves.
+    </p>
+
+    <p>
+      If you've shipped fast with AI tools and want a second pair of eyes
+      before it goes further, that's exactly what a vibe code audit is for.
+    </p>
+
+    <p class="book">
+      <a class="button" data-calendly href="https://calendly.com/papaonlegs/30min">Book a call</a>
+    </p>
+
+    <div class="references">
+      <h2>References</h2>
+      <ol>
+        <li><a href="https://mattpalmer.io/posts/statement-on-CVE-2025-48757/">Matt Palmer — statement on CVE-2025-48757</a></li>
+        <li><a href="https://supabase.com/docs/guides/database/postgres/row-level-security">Supabase — Row Level Security docs</a></li>
+        <li><a href="https://owasp.org/Top10/2021/A01_2021-Broken_Access_Control/">OWASP A01:2021 — Broken Access Control</a></li>
+        <li><a href="https://en.wikipedia.org/wiki/2022_Optus_data_breach">2022 Optus data breach</a></li>
+        <li><a href="https://www.superblocks.com/blog/lovable-vulnerabilities">Superblocks — the Lovable vulnerability explained</a></li>
+      </ol>
+    </div>
+  </article>
+</main>
+<script src="../main.js" defer></script>
+</body>
+</html>
