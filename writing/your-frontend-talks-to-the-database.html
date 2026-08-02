@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>5 — Your frontend talks straight to the database — Farouk Umar</title>
+<meta name="description" content="There is no backend. There's a browser, a database, and a permission layer someone forgot to write. Everything in the client is attacker-controlled — including the validation.">
+
+<link rel="icon" type="image/svg+xml" href="images/unlock-favicon.svg">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://papa.onle.gs/writing/your-frontend-talks-to-the-database.html">
+<meta property="og:title" content="5 — Your frontend talks straight to the database">
+<meta property="og:description" content="There is no backend. There's a browser, a database, and a permission layer someone forgot to write. Everything in the client is attacker-controlled — including the validation.">
+<meta property="og:image" content="https://papa.onle.gs/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="1200">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="5 — Your frontend talks straight to the database">
+<meta name="twitter:description" content="There is no backend. There's a browser, a database, and a permission layer someone forgot to write. Everything in the client is attacker-controlled — including the validation.">
+<meta name="twitter:image" content="https://papa.onle.gs/og.jpg">
+
+<link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+<main>
+  <a class="back" href="index.html">&larr; Writing</a>
+
+  <article class="prose">
+    <h1>5 — Your frontend talks straight to the database</h1>
+    <p class="article-meta">Part of <em>10 reasons why your vibe coded app won't scale</em> &middot; Farouk Umar</p>
+
+    <p>
+      There is no backend. There's a browser, a database, and a permission
+      layer someone forgot to write. Everything in the client is
+      attacker-controlled — including the "validation."
+    </p>
+
+    <p>
+      The default architecture vibe coding tools reach for puts the trust
+      boundary in the client: browser talks to a Supabase or Firebase SDK,
+      which talks straight to the database. That's legitimate <em>in
+      principle</em> — it's a supported pattern, not a mistake by itself —
+      but only if the policy layer guarding it is airtight. And AI
+      generators are good at writing the query. They're bad at writing the
+      policy that's supposed to guard it. The platforms themselves warn
+      about this directly: Firebase's own security rules documentation
+      exists because "clients aren't responsible for enforcing security."
+      Vibe-coded apps put prices, roles, quantities, and
+      <code>isAdmin</code> flags in client-side JavaScript anyway, because
+      that's the fastest path to a working demo.
+    </p>
+
+    <div class="diagram">
+      <img src="images/wall-vs-boundary.svg" alt="Flowchart comparing two architectures: the vibe-coded default, where the browser holds the DB URL, anon key, and price constants, and RLS is the only (often missing) wall before the database; versus an API layer or BFF pattern, where the browser holds only a session token and a trusted server re-checks auth, role, price, and ownership before touching the database.">
+    </div>
+    <p class="diagram-caption">
+      In the left version, one missing rule is the whole database. In the right, it's one endpoint.
+    </p>
+
+    <p>
+      Secrets ship in the bundle, and then they get scraped — this is
+      literally how Moltbook was found in January 2026: researchers at Wiz
+      simply read the production JavaScript and found a hardcoded Supabase
+      URL and key, with Row Level Security never enabled. The exposure
+      reached 1.5 million AI-agent API tokens and roughly 65,000 emails,
+      with private agent messages exposed and any agent takeable over by
+      anyone. The founder confirmed the app was vibe-coded. It's not an
+      isolated case: a wave of Firebase misconfigurations found in January
+      2024 — starting with researchers who got full database privileges on
+      an AI hiring bot just by registering — turned up around 900
+      misconfigured sites exposing 125 million-plus records, including
+      over 20 million plaintext passwords. That predates "vibe coding" as
+      a term; AI just reproduces the same old failure at greater speed and
+      scale now.
+    </p>
+
+    <p>
+      Scale is exactly what turns a quiet misconfiguration into an
+      incident. At twelve users, nobody's looking. At fifty thousand,
+      opening devtools, finding the key in the Network tab, and querying
+      the REST API directly is a five-minute exercise for anyone curious
+      enough to try. One builder's public <a href="https://x.com/leojrr/status/1901560276488511759">"guys, i'm under attack"</a> thread
+      in March 2025 — a Cursor-built SaaS with keys exposed client-side and
+      a paywall enforced only in CSS — went from viral to shut down within
+      five days.
+    </p>
+
+    <div class="diagram">
+      <img src="images/attacker-reach.svg" alt="Flowchart: an attacker with devtools reads the JS bundle and finds the DB URL, anon key, and price constants, then replays requests with curl to reach every table the policy forgot to restrict — often all of them, including the full user table and payments. With a BFF architecture, the same attacker only finds a session token and can only reach what the API implements.">
+    </div>
+    <p class="diagram-caption">
+      Same attacker, same devtools. What they find in the bundle decides how far they get.
+    </p>
+
+    <p>
+      The fix isn't "add auth" — it's add a trust boundary. The
+      backend-for-frontend pattern: the browser holds only a short-lived
+      session token, and a server tier holds the privileged credential,
+      re-validating everything the client claims — price, quantity, role —
+      before acting on it. Escape.tech traced 83% of the exposures across
+      5,600 vibe-coded apps they scanned to exactly this: Supabase RLS
+      misconfiguration, with tables named <code>payments</code>,
+      <code>orders</code>, and <code>transactions</code> left open to
+      unauthenticated writes.
+    </p>
+
+    <p>
+      If you've shipped fast with AI tools and want a second pair of eyes
+      before it goes further, that's exactly what a vibe code audit is for.
+    </p>
+
+    <p class="book">
+      <a class="button" data-calendly href="https://calendly.com/papaonlegs/30min">Book a call</a>
+    </p>
+
+    <div class="references">
+      <h2>References</h2>
+      <ol>
+        <li><a href="https://www.wiz.io/blog/exposed-moltbook-database-reveals-millions-of-api-keys">Wiz — Hacking Moltbook</a></li>
+        <li><a href="https://www.securityweek.com/misconfigured-firebase-instances-expose-125-million-user-records/">SecurityWeek — 125M records exposed via Firebase misconfigurations</a></li>
+        <li><a href="https://escape.tech/blog/methodology-how-we-discovered-vulnerabilities-apps-built-with-vibe-coding/">Escape.tech — vulnerabilities in vibe-coded apps</a></li>
+        <li><a href="https://firebase.google.com/docs/rules">Firebase Security Rules docs</a></li>
+        <li><a href="https://learn.microsoft.com/en-us/azure/architecture/patterns/backends-for-frontends">Microsoft — Backends for Frontends pattern</a></li>
+      </ol>
+    </div>
+  </article>
+</main>
+<script src="../main.js" defer></script>
+</body>
+</html>
