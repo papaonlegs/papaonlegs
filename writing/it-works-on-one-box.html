@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>7 — It works on one box, and that's the whole problem — Farouk Umar</title>
+<meta name="description" content="Scaling up should be a slider. If it's a rewrite, your state is in the wrong place. Five single-box assumptions that break the moment a second instance arrives.">
+
+<link rel="icon" type="image/svg+xml" href="images/servers-favicon.svg">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://papa.onle.gs/writing/it-works-on-one-box.html">
+<meta property="og:title" content="7 — It works on one box, and that's the whole problem">
+<meta property="og:description" content="Scaling up should be a slider. If it's a rewrite, your state is in the wrong place. Five single-box assumptions that break the moment a second instance arrives.">
+<meta property="og:image" content="https://papa.onle.gs/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="1200">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="7 — It works on one box, and that's the whole problem">
+<meta name="twitter:description" content="Scaling up should be a slider. If it's a rewrite, your state is in the wrong place. Five single-box assumptions that break the moment a second instance arrives.">
+<meta name="twitter:image" content="https://papa.onle.gs/og.jpg">
+
+<link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+<main>
+  <a class="back" href="index.html">&larr; Writing</a>
+
+  <article class="prose">
+    <h1>7 — It works on one box, and that's the whole problem</h1>
+    <p class="article-meta">Part of <em>10 reasons why your vibe coded app won't scale</em> &middot; Farouk Umar</p>
+
+    <p>
+      Scaling up should be a slider. If it's a rewrite, your state is in
+      the wrong place.
+    </p>
+
+    <p>
+      Five assumptions hold perfectly on one box and break the moment a
+      second instance shows up: module-level caches, where instance B
+      simply disagrees with whatever instance A cached; in-memory
+      sessions, where a user gets logged out on the refresh that happens
+      to land on the other process; rate-limiter dictionaries, where the
+      effective limit silently multiplies by however many instances are
+      running; cron or timers living inside the web process, where a daily
+      email now sends once per instance; and files written to local disk,
+      which are simply gone the moment the next deploy replaces the box.
+    </p>
+
+    <div class="diagram">
+      <img src="images/instance-two.svg" alt="Flowchart: with one instance, an in-memory cache, in-memory sessions, and an in-process cron timer all work fine behind a load balancer. With two instances behind the same load balancer, the cache copies diverge, sessions on process B don't recognise a user logged in on process A, and the cron timer fires twice — once per instance.">
+    </div>
+    <p class="diagram-caption">
+      Same code, same deploy. The only change is the instance count — and now the cache disagrees with itself.
+    </p>
+
+    <p>
+      None of this throws an error. There's no crash, no stack trace — just
+      nondeterminism the moment a load balancer has more than one place to
+      send a request. These are topology bugs, not logic bugs, which is
+      exactly why they survive code review: the code is correct for the
+      topology it was implicitly written for, and nobody wrote down that
+      the topology was an assumption. Rap Genius's 2013 "Heroku's Ugly
+      Secret" incident is the canonical version of an invisible
+      infrastructure assumption becoming catastrophic at scale: Heroku had
+      silently switched to random routing, and at Rap Genius's traffic,
+      62% of request time was spent purely queueing — an app that needed
+      80 dynos under intelligent routing would have needed roughly 4,000
+      under random. Heroku's own GM publicly confirmed the failure. Nobody
+      at Rap Genius wrote a bug; an assumption about how requests were
+      routed simply stopped being true.
+    </p>
+
+    <p>
+      The fix isn't microservices — it's statelessness. The Twelve-Factor
+      App's sixth factor says this almost verbatim: nothing in memory or
+      on local disk should survive to the next request, and it calls
+      sticky sessions "a violation... never to be used." AWS's own
+      Well-Architected guidance says the same thing in its reliability
+      pillar. It's worth naming the honest counterpoint here, because
+      "just add statelessness" can sound like it contradicts the very real
+      success of monoliths: DHH's majestic monolith and Shopify's modular
+      monolith — 2.8 million lines of Ruby processing over $100M an hour
+      as one deployable unit — are proof that "monolith" was never the
+      problem. The lesson from vibe-coded apps isn't "split into
+      services," it's "make the monolith stateless." Horizontal scale
+      isn't something you bolt on later; it's something you avoid making
+      impossible from the first commit.
+    </p>
+
+    <div class="diagram">
+      <img src="images/stateless-tier.svg" alt="Flowchart: a load balancer routes to any number of stateless web instances, all of which share Redis for sessions, cache, and rate limits, a primary database, and object storage for uploads. Web instances enqueue jobs to a job queue processed by workers, with a single scheduler responsible for scheduling jobs exactly once.">
+    </div>
+    <p class="diagram-caption">
+      Kill any web process mid-request and nothing is lost. The daily job runs once, no matter how many instances exist.
+    </p>
+
+    <p>
+      The target shape is a stateless, disposable web tier with state
+      externalised: Redis for sessions, cache, and rate limits; object
+      storage for anything written to disk; a real job system — Sidekiq,
+      Celery, BullMQ — with a single scheduler, so background work runs
+      once regardless of how many web instances are up. None of it is
+      exotic. It just has to be decided, and vibe coding doesn't decide it
+      — it writes correct code for whatever topology is implicit in the
+      prompt, which is almost always one box.
+    </p>
+
+    <p>
+      If you've shipped fast with AI tools and want a second pair of eyes
+      before it goes further, that's exactly what a vibe code audit is for.
+    </p>
+
+    <p class="book">
+      <a class="button" data-calendly href="https://calendly.com/papaonlegs/30min">Book a call</a>
+    </p>
+
+    <div class="references">
+      <h2>References</h2>
+      <ol>
+        <li><a href="https://12factor.net/processes">The Twelve-Factor App — VI. Processes</a></li>
+        <li><a href="https://docs.aws.amazon.com/wellarchitected/latest/reliability-pillar/rel_mitigate_interaction_failure_stateless.html">AWS Well-Architected — stateless application design</a></li>
+        <li><a href="https://genius.engineering/herokus-ugly-secret/">Heroku's Ugly Secret</a></li>
+        <li><a href="https://signalvnoise.com/svn3/the-majestic-monolith/">DHH — The Majestic Monolith</a></li>
+        <li><a href="https://shopify.engineering/deconstructing-monolith-designing-software-maximizes-developer-productivity">Shopify Engineering — Deconstructing the Monolith</a></li>
+      </ol>
+    </div>
+  </article>
+</main>
+<script src="../main.js" defer></script>
+</body>
+</html>
