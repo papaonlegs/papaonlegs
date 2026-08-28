@@ -118,6 +118,9 @@ ul.services li a:hover {
 }
 .book {
   margin: 0 0 2.25rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
 }
 .book a.button {
   display: inline-block;
@@ -251,4 +254,90 @@ footer {
 .references a:hover {
   color: var(--fg);
   border-bottom-color: var(--fg);
+}
+
+/* Audit lead-magnet page */
+.prose pre {
+  background: var(--fg);
+  border: 1px solid var(--rule);
+  border-radius: 0.5rem;
+  padding: 0.9rem 1rem;
+  margin: 0 0 1.15rem;
+  overflow-x: auto;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+.prose pre code {
+  font-family: "SF Mono", Menlo, Consolas, monospace;
+  color: var(--bg);
+}
+.audit-form {
+  margin-top: 0.5rem;
+}
+.audit-form .field {
+  margin: 0 0 0.9rem;
+}
+.audit-form label {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--muted);
+  margin-bottom: 0.3rem;
+}
+.audit-form input,
+.audit-form textarea {
+  width: 100%;
+  font: inherit;
+  font-size: 0.95rem;
+  color: var(--fg);
+  background: var(--bg);
+  border: 1px solid var(--rule);
+  border-radius: 0.35rem;
+  padding: 0.55rem 0.7rem;
+}
+.audit-form input:focus,
+.audit-form textarea:focus {
+  outline: none;
+  border-color: var(--fg);
+}
+.audit-form textarea {
+  resize: vertical;
+  min-height: 4.5rem;
+}
+.audit-form button {
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--bg);
+  background: var(--fg);
+  border: 1px solid var(--fg);
+  border-radius: 0.35rem;
+  padding: 0.65rem 1.15rem;
+  cursor: pointer;
+}
+.audit-form button:hover {
+  opacity: 0.85;
+}
+.audit-form button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.audit-form .note {
+  font-size: 0.82rem;
+  color: var(--muted);
+  margin-top: 0.6rem;
+}
+.audit-status {
+  display: none;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--rule);
+  border-radius: 0.5rem;
+  font-size: 0.92rem;
+}
+.audit-status.show {
+  display: block;
+}
+.audit-status.error {
+  border-color: #b3261e;
+  color: #b3261e;
 }
