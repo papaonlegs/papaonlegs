@@ -66,9 +66,9 @@ function sendLeadMagnetEmail(name, email, problem) {
   const mono = "'SF Mono',Menlo,Consolas,monospace";
 
   function codeBlock(lines) {
-    return '<div style="background:#fff;border:1px solid ' + rule + ';border-radius:8px;' +
+    return '<div style="background:' + fg + ';border:1px solid ' + rule + ';border-radius:8px;' +
       'padding:12px 14px;margin:0 0 18px;font-family:' + mono + ';font-size:13px;' +
-      'line-height:1.6;color:' + fg + ';white-space:pre-wrap;word-break:break-all;">' +
+      'line-height:1.6;color:' + bg + ';white-space:pre-wrap;word-break:break-all;">' +
       lines.replace(/&/g, '&amp;').replace(/</g, '&lt;') + '</div>';
   }
   function h3(text) {
