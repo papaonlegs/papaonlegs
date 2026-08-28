@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Audit your repo against the ten reasons — Farouk Umar</title>
+<meta name="description" content="A free, open-source companion to the vibe-coded-app-won't-scale series. Run it against your own repo and see which of the ten reasons already apply to you.">
+
+<link rel="icon" type="image/png" sizes="32x32" href="../favicon-32.png">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://papa.onle.gs/writing/audit-your-repo.html">
+<meta property="og:title" content="Audit your repo against the ten reasons">
+<meta property="og:description" content="A free, open-source companion to the vibe-coded-app-won't-scale series. Run it against your own repo and see which of the ten reasons already apply to you.">
+<meta property="og:image" content="https://papa.onle.gs/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="1200">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Audit your repo against the ten reasons">
+<meta name="twitter:description" content="A free, open-source companion to the vibe-coded-app-won't-scale series. Run it against your own repo and see which of the ten reasons already apply to you.">
+<meta name="twitter:image" content="https://papa.onle.gs/og.jpg">
+
+<link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+<main>
+  <a class="back" href="index.html">&larr; Writing</a>
+
+  <article class="prose">
+    <h1>Audit your repo against the ten reasons</h1>
+    <p class="article-meta">Companion to <em>10 reasons why your vibe coded app won't scale</em> &middot; Farouk Umar</p>
+
+    <p>
+      The series names ten failure modes. This is the part you can run — a
+      free, open-source kit that checks your own repo against all ten and
+      writes an evidence-first report: file:line, not vibes. It's on
+      <a href="https://github.com/papaonlegs/wont-scale">GitHub</a>, MIT
+      licensed, and you should read it before you run it — the install
+      script tells you exactly what it does and what leaves your machine.
+    </p>
+
+    <h3>Quick install</h3>
+    <p>
+      One command runs an interactive session: it detects your stack and
+      your AI CLI, drives it through the ten reasons, and writes the report.
+    </p>
+    <pre><code>curl -fsSL https://github.com/papaonlegs/wont-scale/releases/latest/download/install.sh | sh</code></pre>
+
+    <h3>Claude Code plugin</h3>
+    <p>Prefer it as a plugin inside Claude Code:</p>
+    <pre><code>/plugin marketplace add papaonlegs/wont-scale
+/plugin install wont-scale@wont-scale
+/first-audit</code></pre>
+
+    <h3>Plain terminal wizard</h3>
+    <p>No AI required — ten questions, a config file, a tailored report:</p>
+    <pre><code>git clone https://github.com/papaonlegs/wont-scale.git
+cd wont-scale &amp;&amp; npm install
+node dist/first-audit.js /path/to/your-app</code></pre>
+
+    <p>
+      Or just <a href="https://github.com/papaonlegs/wont-scale">browse the
+      kit</a> — every reason is a module with the checks, the fix in
+      priority order, and the real incidents behind it.
+    </p>
+
+    <h3>Want it in your inbox instead?</h3>
+    <p>
+      Tell me what's actually breaking and I'll send the commands above
+      plus a note on your specific situation.
+    </p>
+
+    <form class="audit-form" id="audit-form">
+      <div class="field">
+        <label for="audit-name">Name</label>
+        <input type="text" id="audit-name" name="name" required autocomplete="name">
+      </div>
+      <div class="field">
+        <label for="audit-email">Email</label>
+        <input type="email" id="audit-email" name="email" required autocomplete="email">
+      </div>
+      <div class="field">
+        <label for="audit-problem">What problem are you facing?</label>
+        <textarea id="audit-problem" name="problem" required></textarea>
+      </div>
+      <button type="submit" id="audit-submit">Send it to me</button>
+      <p class="note">Goes straight to my inbox too — if it sounds like a second pair of eyes would help, I'll reply.</p>
+    </form>
+    <div class="audit-status" id="audit-status"></div>
+
+    <p class="book">
+      <a class="button" data-calendly href="https://calendly.com/papaonlegs/30min">Book a call</a>
+    </p>
+  </article>
+</main>
+<script src="../main.js" defer></script>
+<script src="audit.js" defer></script>
+</body>
+</html>
