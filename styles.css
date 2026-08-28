@@ -116,6 +116,22 @@ ul.services li a {
 ul.services li a:hover {
   text-decoration: underline;
 }
+.series-box {
+  border: 1px solid var(--rule);
+  border-radius: 0.5rem;
+  padding: 0 1rem;
+  margin: 0 0 1.25rem;
+}
+.series-box ul.services {
+  margin: 0;
+}
+.series-box ul.services li:last-child {
+  border-bottom: none;
+}
+.icon-package {
+  vertical-align: -3px;
+  margin-right: 0.5rem;
+}
 .book {
   margin: 0 0 2.25rem;
   display: flex;
