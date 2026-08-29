@@ -272,6 +272,19 @@ footer {
   border-bottom-color: var(--fg);
 }
 
+.prose code {
+  font-family: "SF Mono", Menlo, Consolas, monospace;
+  font-size: 0.88em;
+  background: var(--rule);
+  padding: 0.1em 0.4em;
+  border-radius: 0.25rem;
+}
+.prose pre code {
+  background: none;
+  padding: 0;
+  border-radius: 0;
+}
+
 /* Audit lead-magnet page */
 .prose pre {
   background: var(--fg);

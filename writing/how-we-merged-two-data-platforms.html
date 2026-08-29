@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How we merged two enterprise data platforms with zero data loss — Farouk Umar</title>
+<meta name="description" content="Two Snowflake accounts, roughly 150 users, a dozen duplicate databases — merged into one in a two-hour cutover window, with nothing lost. The mechanism, and the part that almost went wrong.">
+
+<link rel="icon" type="image/svg+xml" href="images/merge-favicon.svg">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://papa.onle.gs/writing/how-we-merged-two-data-platforms.html">
+<meta property="og:title" content="How we merged two enterprise data platforms with zero data loss">
+<meta property="og:description" content="Two Snowflake accounts, roughly 150 users, a dozen duplicate databases — merged into one in a two-hour cutover window, with nothing lost. The mechanism, and the part that almost went wrong.">
+<meta property="og:image" content="https://papa.onle.gs/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="1200">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="How we merged two enterprise data platforms with zero data loss">
+<meta name="twitter:description" content="Two Snowflake accounts, roughly 150 users, a dozen duplicate databases — merged into one in a two-hour cutover window, with nothing lost. The mechanism, and the part that almost went wrong.">
+<meta name="twitter:image" content="https://papa.onle.gs/og.jpg">
+
+<link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+<main>
+  <a class="back" href="index.html">&larr; Writing</a>
+
+  <article class="prose">
+    <h1>How we merged two enterprise data platforms with zero data loss</h1>
+    <p class="article-meta">Part 1 of 2 &middot; companion piece: <a href="what-the-two-hour-window-cost.html">What the two-hour window really cost</a> &middot; Farouk Umar</p>
+
+    <p>
+      Two Snowflake accounts, built up independently over several years by
+      two different parts of the same company. Roughly 150 users between
+      them. Around 170 roles, a dozen duplicate databases answering to
+      slightly different names for what was mostly the same data. We
+      merged them into one account, in a two-hour business-wide cutover
+      window, and lost nothing. This is the mechanism — and the part
+      that almost went wrong.
+    </p>
+
+    <p>
+      Start with the thing nobody tells you going in: Snowflake doesn't
+      have a "merge two accounts" button. <a href="https://docs.snowflake.com/en/user-guide/organizations">Organizations</a>,
+      Snowflake's own multi-account management layer, is explicitly a
+      visibility and billing tool over accounts that stay separate — its
+      own launch material frames the value as unified oversight, not
+      consolidation. Snowflake's guidance for company mergers goes further
+      than staying quiet on the topic: it actively recommends the
+      opposite of what we did. Keep the accounts federated, connect them
+      with secure data sharing, let each side keep operating
+      independently. We wanted one account, not two politely connected
+      ones. That meant repurposing a completely different part of the
+      product: disaster recovery.
+    </p>
+
+    <div class="diagram">
+      <img src="images/merge-mechanism.svg" alt="Flowchart: Account A and Account B start separate; Account A replicates into a cutover window via a scheduled failover group, while external tables, stages, pipes, dashboards and storage integrations are migrated by hand in parallel; the window promotes and verifies into a single unified account, and Account B is decommissioned after verification.">
+    </div>
+    <p class="diagram-caption">
+      Two accounts in, one account out. The failover group carries the bulk of it; everything it can't touch gets a manual checklist and a deadline.
+    </p>
+
+    <p>
+      The tool that made this possible is <a href="https://docs.snowflake.com/en/user-guide/account-replication-intro">failover groups</a>,
+      not plain replication groups — the distinction matters, because only
+      a failover group can be promoted from secondary to primary.
+      Replication groups mirror data one-way, indefinitely, with no
+      cutover built in. A failover group is the same mechanism plus an
+      exit: <code>ALTER FAILOVER GROUP &lt;name&gt; PRIMARY;</code>, and
+      the target account stops being a replica and starts being the
+      account. It requires Business Critical Edition or higher, and
+      almost everything that matters replicates on schedule — databases,
+      schemas, roles, users, warehouses, network policies, tags.
+    </p>
+
+    <p>
+      The gotcha that could have turned this into an incident: replicate
+      into an account that already has its own users, roles, and
+      warehouses without protecting them first, and the incoming
+      replication <em>overwrites</em> them — silently, on schedule,
+      exactly as designed. Snowflake exposes
+      <code>SYSTEM$LINK_ACCOUNT_OBJECTS_BY_NAME()</code> for precisely
+      this situation, and skipping it is the difference between a merge
+      and a rewrite of the account you meant to keep.
+    </p>
+
+    <div class="diagram">
+      <img src="images/replication-checklist.svg" alt="Flowchart split into two paths converging on 'Ready for cutover': the automatic path replicates databases and schemas, roles, users, warehouses, network policies and tags via the failover group; the manual path covers external tables, stages and pipes, Snowsight dashboards and worksheets, storage integrations, and Time Travel history, which do not replicate and are migrated by hand before the window.">
+    </div>
+    <p class="diagram-caption">
+      The failover group's own documentation lists what it doesn't carry. External stages, pipes, dashboards, and Time Travel history all needed a separate, manual migration track — on a checklist, finished before the window opened, not during it.
+    </p>
+
+    <p>
+      Reconciling around 170 roles across two accounts is where most of
+      the actual engineering time went, and Terraform did the job a
+      spreadsheet couldn't: every role and every grant declared in code,
+      diffed against both accounts before every apply, so a role that
+      existed under one name in Account A and a near-identical name in
+      Account B got resolved deliberately, not by whichever replicated
+      last. Nothing shipped as a manual grant that wasn't reconciled back
+      into code afterwards — the whole point of using infrastructure as
+      code for identity is that "temporary" access has nowhere to hide.
+    </p>
+
+    <p>
+      The part that's easy to skip: Snowflake publishes no RPO or RTO
+      guarantee for failover groups. "Zero data loss" is not a number the
+      vendor gives you — it's a number you have to go and prove yourself.
+      We did it the way <a href="https://stripe.dev/blog/how-stripes-document-databases-supported-99.999-uptime-with-zero-downtime-data-migrations">Stripe
+      describes doing it</a> for their own zero-downtime data migrations:
+      row-count reconciliation and checksums against both accounts before
+      the window closed, not a trust exercise after the fact. If the
+      counts didn't match, the cutover didn't happen — the go/no-go gate
+      that made that credible is the subject of
+      <a href="what-the-two-hour-window-cost.html">the next post</a>.
+    </p>
+
+    <p>
+      If you're looking at two data platforms that need to become one,
+      and want a second pair of eyes on the plan before you touch
+      anything, that's exactly the kind of conversation worth having.
+    </p>
+
+    <p class="book">
+      <a class="button" data-calendly href="https://calendly.com/papaonlegs/30min">Book a call</a>
+    </p>
+
+    <div class="references">
+      <h2>References</h2>
+      <ol>
+        <li><a href="https://docs.snowflake.com/en/user-guide/organizations">Snowflake — Introduction to organizations</a></li>
+        <li><a href="https://docs.snowflake.com/en/user-guide/account-replication-intro">Snowflake — Introduction to replication and failover</a></li>
+        <li><a href="https://docs.snowflake.com/en/user-guide/account-replication-considerations">Snowflake — Replication considerations (non-replicating objects)</a></li>
+        <li><a href="https://interworks.com/blog/2022/11/01/using-failover-groups-to-migrate-or-failover-between-snowflake-accounts/">InterWorks — Using Failover Groups to Migrate or Failover Between Snowflake Accounts</a></li>
+        <li><a href="https://stripe.dev/blog/how-stripes-document-databases-supported-99.999-uptime-with-zero-downtime-data-migrations">Stripe — Zero-downtime data migrations</a></li>
+      </ol>
+    </div>
+  </article>
+</main>
+<script src="../main.js" defer></script>
+</body>
+</html>
