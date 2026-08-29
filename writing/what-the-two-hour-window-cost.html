@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What the two-hour cutover window really cost — Farouk Umar</title>
+<meta name="description" content="The visible part of a major data-platform merger was two hours. The part that decided whether it worked was three months long, and nobody outside the team ever saw it.">
+
+<link rel="icon" type="image/svg+xml" href="images/clock-window-favicon.svg">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://papa.onle.gs/writing/what-the-two-hour-window-cost.html">
+<meta property="og:title" content="What the two-hour cutover window really cost">
+<meta property="og:description" content="The visible part of a major data-platform merger was two hours. The part that decided whether it worked was three months long, and nobody outside the team ever saw it.">
+<meta property="og:image" content="https://papa.onle.gs/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="1200">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="What the two-hour cutover window really cost">
+<meta name="twitter:description" content="The visible part of a major data-platform merger was two hours. The part that decided whether it worked was three months long, and nobody outside the team ever saw it.">
+<meta name="twitter:image" content="https://papa.onle.gs/og.jpg">
+
+<link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+<main>
+  <a class="back" href="index.html">&larr; Writing</a>
+
+  <article class="prose">
+    <h1>What the two-hour cutover window really cost</h1>
+    <p class="article-meta">Part 2 of 2 &middot; companion piece: <a href="how-we-merged-two-data-platforms.html">How we merged two enterprise data platforms</a> &middot; Farouk Umar</p>
+
+    <p>
+      The visible part of the migration was two hours. The part that
+      actually decided whether it worked was three months long, and
+      nobody outside the team ever saw it. The technical mechanism —
+      failover groups, role reconciliation, what silently doesn't
+      replicate — is <a href="how-we-merged-two-data-platforms.html">the
+      previous post</a>. This one is about the part that doesn't show up
+      in a Snowflake docs page: getting several hundred people ready for
+      an outage window they didn't choose the timing of, and building
+      enough confidence in the plan that "go" was a genuinely informed
+      decision, not a hope.
+    </p>
+
+    <p>
+      The pattern holds everywhere it's been written up publicly.
+      <a href="https://github.blog/news-insights/making-mysql-better-at-github/">GitHub's
+      2014 MySQL migration</a> cut over in 13 minutes — after weeks of
+      replaying real production traffic against the new cluster and
+      running each configuration through 12-hour soak tests before it was
+      trusted anywhere near customers. <a href="https://www.figma.com/blog/how-figma-scaled-to-multiple-databases/">Figma's
+      2023 database split</a> held its cutover under a minute per
+      partition, verified via replica-parity checks, with reverse
+      replication kept live specifically so there was a real way back if
+      something looked wrong. Neither company got a short window by
+      accident. The window is short <em>because</em> of the invisible
+      work, not despite it — the two are the same investment, just
+      measured at different points.
+    </p>
+
+    <div class="diagram">
+      <img src="images/prep-timeline.svg" alt="Gantt chart titled 'Three months of prep for a two-hour window': a Comms section spanning stakeholder briefings and analyst and support readiness over the first six weeks, a Technical rehearsal section with two dry-run cutovers and a final rehearsal in the following month, and a Cutover section showing a go/no-go milestone immediately followed by a one-day live cutover window at the very end of the timeline.">
+    </div>
+    <p class="diagram-caption">
+      Illustrative, not the literal calendar — but the shape is real: comms and rehearsal fill almost the entire timeline, and the cutover itself is the last, smallest bar.
+    </p>
+
+    <p>
+      Google's own SRE Workbook draws a line worth borrowing: change
+      <em>control</em> is the technical mechanics of a change; change
+      <em>management</em> is preparing the actual humans — engineering,
+      product, the analyst community, support — for it. We treated them
+      as two separate workstreams with two separate owners, running in
+      parallel from day one, because the SRE literature's other
+      well-known finding is the reason you can't skip either:
+      Google states that roughly 70% of outages trace back to changes in
+      a live system. A comms programme isn't overhead sitting around the
+      technical work. It's the other half of the same risk surface.
+    </p>
+
+    <p>
+      Coordinating a single window across time zones has no clean
+      answer, and I won't pretend we found one — there is no hour that's
+      good for everyone, and the honest version of that conversation is
+      picking the least-bad option deliberately and saying so, weeks in
+      advance, rather than discovering the complaint after the fact.
+      What made the window itself defensible was further upstream: go/no-go
+      criteria written down before the first rehearsal, not improvised in
+      the room on the day.
+    </p>
+
+    <div class="diagram">
+      <img src="images/go-no-go-gate.svg" alt="Flowchart: readiness is tracked weekly, feeding into dry run 1; a pass leads to dry run 2, a fail loops back to tracking readiness; dry run 2's pass leads to a final rehearsal, again with a fail looping back; the final rehearsal's pass leads to the go/no-go gate itself, which either proceeds to the cutover window or reschedules with no blame attached to a no-go.">
+    </div>
+    <p class="diagram-caption">
+      Every stage can fail back to "keep preparing" without it being anyone's fault. The only stage that can't loop back is the one after the gate.
+    </p>
+
+    <p>
+      The reason that gate needed to be real, not theatre, is that this
+      goes wrong constantly, in public, at companies with far more
+      resource than we had. TSB's 2018 core banking migration locked
+      roughly 5.2 million customers out of their accounts and cost the
+      bank £48.65m in FCA and PRA fines for inadequate planning and weak
+      oversight of the migration. RBS, NatWest, and Ulster Bank were
+      fined a combined £56m after a 2012 batch-processing upgrade was
+      rolled back — without anyone having tested that the rollback itself
+      actually worked. Both are the same failure at different points:
+      confidence that outran verification. A go/no-go gate that can
+      actually say no is what stands between "we planned for this" and
+      becoming the next regulatory case study.
+    </p>
+
+    <p>
+      None of this is about the technology being difficult. It's about
+      the fact that a two-hour number on a change calendar is a promise
+      to several hundred people, and the only way to keep it honestly is
+      to spend the months beforehand where nobody's watching.
+    </p>
+
+    <p>
+      If you're staring down a similar consolidation and want a second
+      pair of eyes on the plan — the comms as much as the cutover — that's
+      exactly the kind of conversation worth having before a date goes on
+      a calendar.
+    </p>
+
+    <p class="book">
+      <a class="button" data-calendly href="https://calendly.com/papaonlegs/30min">Book a call</a>
+    </p>
+
+    <div class="references">
+      <h2>References</h2>
+      <ol>
+        <li><a href="https://github.blog/news-insights/making-mysql-better-at-github/">GitHub — Making MySQL better at GitHub</a></li>
+        <li><a href="https://www.figma.com/blog/how-figma-scaled-to-multiple-databases/">Figma — How Figma scaled to multiple databases</a></li>
+        <li><a href="https://sre.google/workbook/organizational-change/">Google SRE Workbook — Organizational Change Management</a></li>
+        <li><a href="https://www.fca.org.uk/news/press-releases/tsb-fined-48m-operational-resilience-failings">FCA — TSB fined £48.65m for operational resilience failings</a></li>
+        <li><a href="https://www.fca.org.uk/news/press-releases/fca-fines-rbs-natwest-and-ulster-bank-ltd-%C2%A342-million-it-failures">FCA — RBS, NatWest and Ulster Bank fined for IT failures</a></li>
+      </ol>
+    </div>
+  </article>
+</main>
+<script src="../main.js" defer></script>
+</body>
+</html>
