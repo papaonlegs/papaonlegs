@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2 — The bread and butter: script vs. subagent — Farouk Umar</title>
+<meta name="description" content="Why ask a subagent to burn tokens doing the same mechanical task a hundred times, when spending tokens once on a script would do it for free forever?">
+
+<link rel="icon" type="image/svg+xml" href="images/terminal-favicon.svg">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://papa.onle.gs/writing/script-vs-subagent.html">
+<meta property="og:title" content="2 — The bread and butter: script vs. subagent">
+<meta property="og:description" content="Why ask a subagent to burn tokens doing the same mechanical task a hundred times, when spending tokens once on a script would do it for free forever?">
+<meta property="og:image" content="https://papa.onle.gs/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="1200">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="2 — The bread and butter: script vs. subagent">
+<meta name="twitter:description" content="Why ask a subagent to burn tokens doing the same mechanical task a hundred times, when spending tokens once on a script would do it for free forever?">
+<meta name="twitter:image" content="https://papa.onle.gs/og.jpg">
+
+<link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+<main>
+  <a class="back" href="index.html">&larr; Writing</a>
+
+  <article class="prose">
+    <h1>2 — The bread and butter: script vs. subagent</h1>
+    <p class="article-meta">Part of <em>Tokenmaxxing</em> &middot; Farouk Umar</p>
+
+    <p>
+      Why ask a subagent to burn tokens doing the same mechanical task a
+      hundred times, when spending tokens once on a script would do it for
+      free forever?
+    </p>
+
+    <p>
+      This is the part of tokenmaxxing that has nothing to do with
+      leaderboards or judgment calls. It's plumbing. And the default has
+      quietly gone backwards: reaching for a model &mdash; even a cheap one
+      &mdash; has become the first instinct for deterministic, repeatable
+      work, when a script has zero marginal cost and no round-trip. Every
+      LLM call is metered and adds latency. A for-loop is neither.
+    </p>
+
+    <div class="diagram">
+      <img src="images/script-vs-subagent.svg" alt="Flowchart comparing two approaches to a deterministic, repeatable task like renaming forty files or reformatting a report. Calling a subagent every time costs tokens on call 1, call 2, all the way to call 100, for a total cost that is linear in the number of runs plus round-trip latency each time. Writing a script once costs tokens a single time, after which every run is free.">
+    </div>
+    <p class="diagram-caption">
+      The subagent path pays every time. The script path pays once, then never again.
+    </p>
+
+    <p>
+      There's a name for this now: "The Plausibility Trap," a paper from
+      January 2026 that describes exactly this failure mode &mdash; a
+      probabilistic engine applied to a task that was deterministic all
+      along. Its headline number is a roughly 6.5x latency penalty for
+      routing deterministic work through a model instead of code, and it
+      goes further than naming the problem &mdash; it proposes an actual
+      framework for deciding when <em>not</em> to reach for a model in the
+      first place, which is the more useful half of the paper.
+    </p>
+
+    <p>
+      The cost math backs it up before you even get to the multiplier of
+      "asked a hundred times instead of once." Anthropic's own pricing lists
+      Haiku at $1 per million input tokens and $5 per million output tokens;
+      Opus is $5 and $25. That's a 5x jump for one tier up the capability
+      ladder &mdash; before you've decided whether the task needed a subagent
+      call at all, let alone which one.
+    </p>
+
+    <div class="diagram">
+      <img src="images/model-pricing.svg" alt="Bar chart of Anthropic's list pricing per million tokens: Haiku input at $1, Haiku output at $5, Opus input at $5, Opus output at $25.">
+    </div>
+    <p class="diagram-caption">
+      One tier up is a 5x jump on its own. Multiply that by "called every time instead of written once" and the gap compounds fast.
+    </p>
+
+    <p>
+      There's a second cost underneath the dollar figure, and it's harder to
+      put on an invoice: what happens to your own judgment when you hand a
+      deterministic task to a model out of habit rather than necessity. A
+      CHI 2025 study out of Microsoft Research and Carnegie Mellon &mdash;
+      peer-reviewed, n=319 &mdash; found that higher trust in AI output
+      correlated with <em>less</em> critical engagement with that output.
+      You can hold that finding without reaching for the more viral one:
+      MIT Media Lab's "Your Brain on ChatGPT" gets cited constantly, but the
+      authors themselves flag it as preliminary and unreviewed, on a sample
+      of 54 people. The Microsoft/CMU result is the one built to survive
+      scrutiny, and it says the same thing with less drama &mdash; delegate
+      the boring stuff without thinking about it, and the "without thinking
+      about it" part doesn't stay contained to the boring stuff.
+    </p>
+
+    <p>
+      Thoughtworks' Technology Radar made the same call structurally in its
+      April 2026 edition: stop treating "call the frontier model" as the
+      default first step in a pipeline. Often the actual bottleneck is a
+      slow database call or a missing index, not a reasoning gap, and no
+      amount of model capability fixes a problem that was never a reasoning
+      problem.
+    </p>
+
+    <p>
+      None of this is an argument against subagents &mdash; they're the
+      right tool for exactly what they're good at: judgment, synthesis,
+      anything where the input varies enough that hard-coding the logic
+      would be its own maintenance burden. The rule is narrower than
+      "use less AI." It's: if you're about to ask a model to do the
+      identical thing more than a couple of times, you're not looking at a
+      prompt anymore. You're looking at a script that hasn't been written
+      yet. Spend the tokens once, on the thing that pays for itself.
+    </p>
+
+    <div class="references">
+      <h2>References</h2>
+      <ol>
+        <li><a href="https://arxiv.org/abs/2601.15130">The Plausibility Trap (arXiv:2601.15130)</a></li>
+        <li><a href="https://dl.acm.org/doi/10.1145/3706598.3713778">Microsoft Research &amp; CMU &mdash; CHI 2025</a></li>
+        <li><a href="https://www.thoughtworks.com/en-us/insights/blog/technology-strategy/macro-trends-tech-industry-april-2026">Thoughtworks &mdash; Technology Radar, April 2026</a></li>
+        <li><a href="https://www.media.mit.edu/publications/your-brain-on-chatgpt/">MIT Media Lab &mdash; Your Brain on ChatGPT (preliminary, unreviewed, n=54)</a></li>
+        <li><a href="https://www.anthropic.com/pricing">Anthropic &mdash; pricing</a></li>
+      </ol>
+    </div>
+  </article>
+</main>
+<script src="../main.js" defer></script>
+</body>
+</html>
