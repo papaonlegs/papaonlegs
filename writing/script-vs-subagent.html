@@ -106,6 +106,17 @@
     </p>
 
     <p>
+      A concrete example from my own week: an agent that used to be asked,
+      every single run, to go check whether a given endpoint's response
+      shape had drifted from its schema. Same input format, same
+      comparison, same pass/fail output, dozens of times a day. That's not a
+      reasoning task wearing a disguise &mdash; it's a five-line schema diff
+      that got promoted to a model call because writing the prompt felt
+      faster than writing the script, once. It wasn't faster the fiftieth
+      time.
+    </p>
+
+    <p>
       None of this is an argument against subagents &mdash; they're the
       right tool for exactly what they're good at: judgment, synthesis,
       anything where the input varies enough that hard-coding the logic
@@ -113,7 +124,18 @@
       "use less AI." It's: if you're about to ask a model to do the
       identical thing more than a couple of times, you're not looking at a
       prompt anymore. You're looking at a script that hasn't been written
-      yet. Spend the tokens once, on the thing that pays for itself.
+      yet.
+    </p>
+
+    <p>
+      The tell is almost always the same shape: fixed input format, fixed
+      comparison logic, fixed output. If you can describe the task without
+      using the word "judge," "decide," or "figure out," it's a script. If
+      you catch yourself writing the same prompt twice with only the
+      filename changed, stop and write the fifteen lines of code instead
+      &mdash; you'll have it forever, it won't hallucinate, and it won't
+      show up on next month's token bill. Spend the tokens once, on the
+      thing that pays for itself.
     </p>
 
     <div class="references">
