@@ -72,11 +72,13 @@
       No independent benchmark exists yet, and the more interesting problem
       isn't verification &mdash; it's obsolescence. When the model updates,
       the silicon doesn't. Etching weights into a chip means every model
-      revision is a new fabrication run, not a weekend deploy. Meta, whose
-      own model Taalas chose to hardwire for the demo, didn't sign on as a
-      customer &mdash; they doubled down on Nvidia instead, which is about as
-      sharp a review as a competitor can give without saying a word about it
-      directly.
+      revision is a new fabrication run, not a weekend deploy. A software
+      model can be patched the day a jailbreak or a bad output pattern
+      surfaces; a model burned into silicon can't, short of a full
+      re-fabrication cycle measured in months. Meta, whose own model Taalas
+      chose to hardwire for the demo, didn't sign on as a customer &mdash;
+      they doubled down on Nvidia instead, which is about as sharp a review
+      as a competitor can give without saying a word about it directly.
     </p>
 
     <p>
@@ -116,7 +118,18 @@
     <p>
       None of this means bet your infrastructure on unaudited vendor
       numbers, and it doesn't mean etched silicon is coming for your stack
-      next quarter either. It means the floor under "how much does a token
+      next quarter either. Etching a model into a chip only makes sense for
+      a narrow shape of workload &mdash; extremely high volume, a model
+      that's stable enough to freeze for months at a time, and latency
+      requirements tight enough that the obsolescence trade-off is worth
+      making. That's most consumer chat products' floor traffic, not most
+      internal engineering tools, and it's worth being precise about which
+      one you're actually running before any of this changes a procurement
+      decision.
+    </p>
+
+    <p>
+      What this really means is that the floor under "how much does a token
       cost" keeps moving, on both the hardware and software side, faster
       than most teams' pricing assumptions do. Whatever you're optimizing
       for today &mdash; latency, cost per token, power per rack &mdash; check
