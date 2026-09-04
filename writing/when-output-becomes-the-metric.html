@@ -29,36 +29,34 @@
 
   <article class="prose">
     <h1>1 — When output becomes the metric</h1>
-    <p class="article-meta">Part of <em>Tokenmaxxing</em> &middot; Farouk Umar</p>
+    <p class="article-meta">Part of 5 under <em>Tokenmaxxing</em> &middot; Farouk Umar</p>
 
     <p>
       A Meta engineer built an internal leaderboard ranking 85,000 employees
-      by AI token spend. It had a nickname: "Claudeonomics." Andrew Bosworth
-      killed it within days.
+      by AI token spend. It had a nickname: "Claudeonomics." Shopify,
+      Microsoft and a lot of top companies have done the same.
     </p>
 
     <p>
-      Tokenmaxxing is real, it's dated, and it's documented well beyond one
-      awkward internal tool. Meta's own numbers show 60.2 trillion tokens
-      burned company-wide in 30 days &mdash; north of $900M if you priced it
-      at retail. Microsoft has run a similar leaderboard since January 2026.
-      Salesforce has publicly displayed minimum AI-spend targets for teams.
-      None of these companies set out to reward volume for its own sake.
-      Token spend is just the number that's already sitting in a billing
-      dashboard, ready to be sorted and ranked, while "did this actually
-      help" requires someone to go and look. Leadership reached for the
-      metric that was already instrumented. They measured the thing that
-      was easy to measure, and got exactly what they measured.
+      Tokenmaxxing is real, it's dated, and it's documented well beyond a few
+      awkward internal tools. Meta's own numbers show 60.2 trillion
+      non-Llama tokens burned company-wide in 30 days &mdash; north of $900M
+      if you priced it at retail. Microsoft has run a similar leaderboard
+      since January 2026. Salesforce has publicly displayed minimum
+      AI-spend targets for teams. None of these companies set out to reward
+      volume for its own sake. Token spend is just the number that's already
+      sitting in a billing dashboard, ready to be sorted and ranked, while
+      "did this actually help" requires someone to go and look. Leadership
+      tend to reach for the metric that is already instrumented, and easy
+      to measure. You get what you measure.
     </p>
 
     <p>
-      That's Goodhart's law, and it's not a new problem &mdash; it's an old
-      one wearing a new badge. Once tokens spent, PRs merged, or lines of
-      code shipped become the number leadership watches, people optimize the
-      number. GitClear's study of 211 million lines of code found exactly
-      that pattern: code duplication up roughly 8x, and the share of commits
-      doing genuine refactoring dropping from about 25% to under 10%. The
-      volume went up. The craft that keeps volume maintainable went down.
+      Once tokens spent, PRs merged, or lines of code shipped become the
+      number leadership watches, people optimize the number. Duplication
+      goes up, share of commits doing genuine refactoring goes down and
+      total volume goes up. The craft that keeps volume maintainable went
+      down.
     </p>
 
     <div class="diagram">
@@ -69,26 +67,16 @@
     </p>
 
     <p>
-      DORA's 2025 survey of roughly 5,000 respondents found the same shape
-      at the industry level: AI adoption correlates with more throughput
-      <em>and</em> less delivery stability. Not a contradiction &mdash; the
-      predictable result of optimizing for the half of the equation that's
-      easy to put on a dashboard. The mechanism isn't mysterious. AI makes
-      the writing step nearly free, so more code shows up for review. Review
-      capacity doesn't scale the same way &mdash; a senior engineer can only
-      hold so much context in a day &mdash; so the bottleneck just moves
-      downstream, from "can we write this" to "can anyone actually verify
-      it," and the second question is the one nobody put on the leaderboard.
+      AI makes the writing step nearly free, so more code shows up for
+      review. Review capacity doesn't scale the same way &mdash; a senior
+      engineer can only hold so much context in a day &mdash; so the
+      bottleneck just moves downstream, from "can we write this" to "can
+      anyone actually verify it."
     </p>
 
     <p>
       The same gap shows up one layer up, in how we choose the model, not
-      just how we measure the humans using it. Every's September 2026
-      head-to-head found GPT-6 Astra objectively stronger than Claude at
-      writing, at operating software, and at visual design &mdash; and still
-      rated Claude ahead on product instincts, the judgment calls about what
-      a task actually needed. Most of that piece sits behind a paywall, so
-      take the topline finding rather than the scorecard: more capable on
+      just how we measure the humans using it. The more capable model on
       paper isn't automatically better for the outcome. Capability and
       judgment are different axes, and a leaderboard only ever measures one
       of them.
@@ -98,13 +86,12 @@
       <img src="images/judgment-quadrant.svg" alt="Quadrant chart plotting raw capability against product judgment. GPT-6 Astra sits in the upper-left: strong raw capability, second-guessed on judgment. Claude sits in the lower-right: weaker raw capability, trusted with the call.">
     </div>
     <p class="diagram-caption">
-      Every's reviewers reached for Astra for writing and prototypes, and kept reaching for Claude for anything with real product stakes.
+      Every.to's reviewers reached for Astra for writing and prototypes, and kept reaching for Claude for anything with real product stakes.
     </p>
 
     <p>
-      "Outcomes over outputs" isn't a new insight either. It traces back to
-      the SPACE framework &mdash; Forsgren et al., writing in ACM Queue in
-      2021, well before any of this AI-shaped urgency existed. What's
+      "Outcomes over outputs" isn't a new insight either. It traces back
+      well before any of this AI-fueled urgency existed. What's
       changed is who's saying it and why: it's being re-badged by vendors
       selling engineering-productivity telemetry, which is a reasonable
       thing to be skeptical of even when the underlying idea is sound. A
@@ -113,8 +100,7 @@
     </p>
 
     <p>
-      Here's the part that will actually force the correction, and it isn't
-      going to be discipline. It's going to be the bill. Budgets are being
+      What forces correction is not discipline. It's going to be the bill. Budgets are being
       set per employee <em>and</em> per agent now, and an autonomous
       scheduled agent burns tokens with nobody watching the leaderboard at
       all &mdash; it just runs, on a cron, at 3am, whether or not the work it
@@ -129,21 +115,21 @@
     </p>
 
     <p>
-      That's the thread running through the rest of this series: when to
-      spend tokens on a model at all versus write a script once, what the
-      hardware economics underneath the API price actually look like, what
-      "efficient" AI is quietly costing somewhere else, and why tying your
-      whole workflow to one vendor's rate limits is its own kind of risk.
-      Turbulent water ahead. Get a good guide and a life jacket.
+      Next in this series: when to spend tokens on a model at all versus
+      write a script once, what the hardware economics underneath the API
+      price actually look like, what "efficient" AI is quietly costing
+      somewhere else, and why tying your whole workflow to one vendor's rate
+      limits is its own kind of risk. Turbulent water ahead. Get a good
+      guide and a life jacket &mdash; usage limits are changing, stay
+      flexible.
     </p>
 
     <div class="references">
       <h2>References</h2>
       <ol>
         <li><a href="https://blog.pragmaticengineer.com/the-pulse-tokenmaxxing-as-a-weird-new-trend/">The Pragmatic Engineer &mdash; Tokenmaxxing as a weird new trend</a></li>
-        <li><a href="https://dora.dev/dora-report-2025/">DORA 2025 &mdash; State of AI-assisted Software Development</a></li>
         <li><a href="https://www.gitclear.com/ai_assistant_code_quality_2025_research">GitClear &mdash; AI Copilot Code Quality (211M LOC)</a></li>
-        <li><a href="https://every.to/vibe-check/gpt-6-astra-vibe-check">Every &mdash; Vibe Check: GPT-6 Astra</a></li>
+        <li><a href="https://every.to/vibe-check/gpt-6-astra-vibe-check">Every.to &mdash; Vibe Check: GPT-6 Astra</a></li>
       </ol>
     </div>
   </article>
