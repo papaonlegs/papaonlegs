@@ -29,12 +29,13 @@
 
   <article class="prose">
     <h1>2 — The bread and butter: script vs. subagent</h1>
-    <p class="article-meta">Part of <em>Tokenmaxxing</em> &middot; Farouk Umar</p>
+    <p class="article-meta">Part of 5 under <em>Tokenmaxxing</em> &middot; Farouk Umar</p>
 
     <p>
       Why ask a subagent to burn tokens doing the same mechanical task a
       hundred times, when spending tokens once on a script would do it for
-      free forever?
+      'free' forever, even though GPT-5.6 Luna feels free like the air you
+      breathe?
     </p>
 
     <p>
@@ -42,7 +43,7 @@
       leaderboards or judgment calls. It's plumbing. And the default has
       quietly gone backwards: reaching for a model &mdash; even a cheap one
       &mdash; has become the first instinct for deterministic, repeatable
-      work, when a script has zero marginal cost and no round-trip. Every
+      work, when a script has 'zero' marginal cost and no round-trip. Every
       LLM call is metered and adds latency. A for-loop is neither.
     </p>
 
@@ -54,10 +55,9 @@
     </p>
 
     <p>
-      There's a name for this now: "The Plausibility Trap," a paper from
-      January 2026 that describes exactly this failure mode &mdash; a
-      probabilistic engine applied to a task that was deterministic all
-      along. Its headline number is a roughly 6.5x latency penalty for
+      There's a name for this now: "<a href="https://arxiv.org/abs/2601.15130">The Plausibility Trap</a>,"
+      &mdash; a probabilistic engine applied to a task that was deterministic all
+      along. The headline number is a roughly 6.5x latency penalty for
       routing deterministic work through a model instead of code, and it
       goes further than naming the problem &mdash; it proposes an actual
       framework for deciding when <em>not</em> to reach for a model in the
@@ -67,14 +67,14 @@
     <p>
       The cost math backs it up before you even get to the multiplier of
       "asked a hundred times instead of once." Anthropic's own pricing lists
-      Haiku at $1 per million input tokens and $5 per million output tokens;
-      Opus is $5 and $25. That's a 5x jump for one tier up the capability
-      ladder &mdash; before you've decided whether the task needed a subagent
-      call at all, let alone which one.
+      Haiku 4.5 at $1 per million input tokens and $5 per million output
+      tokens; Opus 5 is $5 and $25. That's a 5x jump for one tier up the
+      capability ladder &mdash; before you've decided whether the task needed
+      a subagent call at all, let alone which one.
     </p>
 
     <div class="diagram">
-      <img src="images/model-pricing.svg" alt="Bar chart of Anthropic's list pricing per million tokens: Haiku input at $1, Haiku output at $5, Opus input at $5, Opus output at $25.">
+      <img src="images/model-pricing.svg" alt="Bar chart of Anthropic's list pricing per million tokens: Haiku 4.5 input at $1, Haiku 4.5 output at $5, Opus 5 input at $5, Opus 5 output at $25.">
     </div>
     <p class="diagram-caption">
       One tier up is a 5x jump on its own. Multiply that by "called every time instead of written once" and the gap compounds fast.
@@ -83,37 +83,17 @@
     <p>
       There's a second cost underneath the dollar figure, and it's harder to
       put on an invoice: what happens to your own judgment when you hand a
-      deterministic task to a model out of habit rather than necessity. A
-      CHI 2025 study out of Microsoft Research and Carnegie Mellon &mdash;
-      peer-reviewed, n=319 &mdash; found that higher trust in AI output
-      correlated with <em>less</em> critical engagement with that output.
-      You can hold that finding without reaching for the more viral one:
-      MIT Media Lab's "Your Brain on ChatGPT" gets cited constantly, but the
-      authors themselves flag it as preliminary and unreviewed, on a sample
-      of 54 people. The Microsoft/CMU result is the one built to survive
-      scrutiny, and it says the same thing with less drama &mdash; delegate
-      the boring stuff without thinking about it, and the "without thinking
-      about it" part doesn't stay contained to the boring stuff.
+      deterministic task to a model out of habit rather than necessity.
+      Higher trust in AI output correlates with <em>less</em> critical
+      engagement with that output. Delegate the boring stuff without
+      thinking about it, and the "without thinking about it" part doesn't
+      stay contained to the boring stuff.
     </p>
 
     <p>
-      Thoughtworks' Technology Radar made the same call structurally in its
-      April 2026 edition: stop treating "call the frontier model" as the
-      default first step in a pipeline. Often the actual bottleneck is a
-      slow database call or a missing index, not a reasoning gap, and no
-      amount of model capability fixes a problem that was never a reasoning
-      problem.
-    </p>
-
-    <p>
-      A concrete example from my own week: an agent that used to be asked,
-      every single run, to go check whether a given endpoint's response
-      shape had drifted from its schema. Same input format, same
-      comparison, same pass/fail output, dozens of times a day. That's not a
-      reasoning task wearing a disguise &mdash; it's a five-line schema diff
-      that got promoted to a model call because writing the prompt felt
-      faster than writing the script, once. It wasn't faster the fiftieth
-      time.
+      Often the actual bottleneck is a slow database call or a missing
+      index, not a reasoning gap, and no amount of model capability fixes a
+      problem that was never a reasoning problem.
     </p>
 
     <p>
@@ -128,14 +108,15 @@
     </p>
 
     <p>
-      The tell is almost always the same shape: fixed input format, fixed
+      The tell is almost always the same: fixed input format, fixed
       comparison logic, fixed output. If you can describe the task without
       using the word "judge," "decide," or "figure out," it's a script. If
       you catch yourself writing the same prompt twice with only the
       filename changed, stop and write the fifteen lines of code instead
       &mdash; you'll have it forever, it won't hallucinate, and it won't
       show up on next month's token bill. Spend the tokens once, on the
-      thing that pays for itself.
+      thing that pays for itself. You can even ask the model to generate
+      the script for you.
     </p>
 
     <div class="references">
@@ -143,8 +124,6 @@
       <ol>
         <li><a href="https://arxiv.org/abs/2601.15130">The Plausibility Trap (arXiv:2601.15130)</a></li>
         <li><a href="https://dl.acm.org/doi/10.1145/3706598.3713778">Microsoft Research &amp; CMU &mdash; CHI 2025</a></li>
-        <li><a href="https://www.thoughtworks.com/en-us/insights/blog/technology-strategy/macro-trends-tech-industry-april-2026">Thoughtworks &mdash; Technology Radar, April 2026</a></li>
-        <li><a href="https://www.media.mit.edu/publications/your-brain-on-chatgpt/">MIT Media Lab &mdash; Your Brain on ChatGPT (preliminary, unreviewed, n=54)</a></li>
         <li><a href="https://www.anthropic.com/pricing">Anthropic &mdash; pricing</a></li>
       </ol>
     </div>
