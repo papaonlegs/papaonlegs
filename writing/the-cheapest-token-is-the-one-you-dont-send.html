@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3 — The cheapest token is the one you don't send — Farouk Umar</title>
+<meta name="description" content="Three concrete ways to cut AI spend that have nothing to do with using AI less: batch it, compress it, or don't call a model at all.">
+
+<link rel="icon" type="image/svg+xml" href="images/funnel-favicon.svg">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://papa.onle.gs/writing/the-cheapest-token-is-the-one-you-dont-send.html">
+<meta property="og:title" content="3 — The cheapest token is the one you don't send">
+<meta property="og:description" content="Three concrete ways to cut AI spend that have nothing to do with using AI less: batch it, compress it, or don't call a model at all.">
+<meta property="og:image" content="https://papa.onle.gs/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="1200">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="3 — The cheapest token is the one you don't send">
+<meta name="twitter:description" content="Three concrete ways to cut AI spend that have nothing to do with using AI less: batch it, compress it, or don't call a model at all.">
+<meta name="twitter:image" content="https://papa.onle.gs/og.jpg">
+
+<link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+<main>
+  <a class="back" href="index.html">&larr; Writing</a>
+
+  <article class="prose">
+    <h1>3 — The cheapest token is the one you don't send</h1>
+    <p class="article-meta">Part of 5 under <em>Tokenmaxxing</em> &middot; Farouk Umar</p>
+
+    <p>
+      Not every token-saving move is about using AI less. Some of it is just
+      buying the same tokens cheaper, sending fewer of them for the same
+      result, or routing the easy 90% away from the model entirely. None of
+      it requires willpower. All of it requires knowing the levers exist
+      &mdash; and most teams I talk to are using zero of the three below,
+      not because they don't make sense, but because nobody's gone looking
+      for them yet.
+    </p>
+
+    <p>
+      The first lever is the dumbest one, and it's the one most people
+      leave on the table: if the response doesn't need to come back in real
+      time, it shouldn't be priced like it does. Anthropic's Message Batches
+      API and OpenAI's Batch API both cut the token price in half &mdash;
+      flat 50% off standard rates, for anything you can queue instead of
+      wait on. Nightly reports, bulk classification, eval runs, backfilling
+      a dataset &mdash; none of that needs a synchronous response, and all
+      of it is currently running at double the price it needs to for a lot
+      of teams.
+    </p>
+
+    <div class="diagram">
+      <img src="images/batch-vs-sync.svg" alt="Bar chart of API cost index for synchronous versus batch processing, both Anthropic and OpenAI, with synchronous indexed at 100 and batch at 50 for both providers.">
+    </div>
+    <p class="diagram-caption">
+      Same tokens, same model, half the price &mdash; the only cost is not needing the answer immediately.
+    </p>
+
+    <p>
+      The second lever shrinks what you send instead of what you pay per
+      token. Microsoft Research's LLMLingua compresses prompts up to 20x
+      with minimal measured loss on QA and reasoning benchmarks, and its
+      follow-up, LongLLMLingua, found something sharper: in long-context RAG
+      setups, compressing down to roughly a quarter of the original tokens
+      didn't just cut cost &mdash; it improved task performance by up to
+      21.4%, because a shorter, denser context fights the "lost in the
+      middle" problem that long contexts create in the first place. Cutting
+      tokens and improving accuracy aren't in tension here. Stuffing a
+      model's context window is a habit, not a requirement.
+    </p>
+
+    <p>
+      The third lever is the one with the most room to be misused, so it's
+      worth being precise about it: don't call a model for a decision a
+      deterministic system can make correctly and near-instantly. A regex,
+      a keyword match, or a rules engine can resolve a large share of
+      requests before a model ever needs to see them &mdash; open-source
+      rules engines like GoRules' ZEN evaluate decisions in microseconds,
+      not the hundreds of milliseconds a model call costs even before you
+      count tokens.
+    </p>
+
+    <div class="diagram">
+      <img src="images/deterministic-gate.svg" alt="Flowchart showing an incoming request going through a deterministic gate made of regex or a rules engine. If it matches a known pattern, it's handled directly in microseconds at near-zero cost. If it's ambiguous or novel, it escalates to the model, which only handles the hard remainder.">
+    </div>
+    <p class="diagram-caption">
+      The gate doesn't replace the model. It narrows what reaches the model down to the part that actually needs judgment.
+    </p>
+
+    <p>
+      But the honest version of this lever isn't "regex beats the model" —
+      a Cleveland Clinic study published on medRxiv in January 2026 makes
+      that precise. Extracting structured fields from free-text cardiac
+      test reports, regex alone scored an F1 of 0.74 &mdash; good enough to
+      look useful, not good enough to trust. Adding a targeted,
+      on-premises LLM stage for exactly the fields regex got wrong pushed
+      that to 0.98. The lesson isn't "skip the model." It's: let the
+      deterministic layer handle everything it can handle correctly, and
+      spend the model's judgment only on the fraction that actually needs
+      it &mdash; which is a much smaller, and much cheaper, fraction than
+      "every request."
+    </p>
+
+    <p>
+      Two things I looked into and would flag before you build a business
+      case around them: semantic caching &mdash; tools like GPTCache or
+      Redis's LangCache, which return a cached answer for a
+      semantically-similar past query instead of re-calling the model
+      &mdash; is mechanically sound, but neither vendor has published a
+      real, audited hit-rate or dollar figure; the "70% savings" numbers
+      circulating online trace back to blog posts, not disclosed
+      deployments. Same caveat applies to most of the newer LLM-routing
+      startups: real companies, plausible pitch, but the specific
+      savings percentages you'll find for them are aggregator-blog math,
+      not vendor-disclosed results. That doesn't make either idea wrong
+      &mdash; a cache that returns a stored answer instead of a fresh
+      generation is obviously going to save something on a repetitive
+      workload &mdash; it just means you should run your own before-and-after
+      on your own traffic before you put a number in a slide. Worth
+      trying both. Worth verifying the number yourself before you repeat it.
+    </p>
+
+    <p>
+      None of these three levers touch how good the model is, how you
+      prompt it, or how much AI your team uses. They touch the plumbing
+      around it &mdash; when you call it, how much you hand it, and whether
+      you needed to call it at all. That's the whole point of tokenmaxxing
+      done right: the savings that don't cost you anything to take.
+    </p>
+
+    <div class="references">
+      <h2>References</h2>
+      <ol>
+        <li><a href="https://platform.claude.com/docs/en/build-with-claude/batch-processing">Anthropic &mdash; Message Batches API</a></li>
+        <li><a href="https://developers.openai.com/api/docs/guides/batch">OpenAI &mdash; Batch API</a></li>
+        <li><a href="https://www.microsoft.com/en-us/research/blog/llmlingua-innovating-llm-efficiency-with-prompt-compression/">Microsoft Research &mdash; LLMLingua</a></li>
+        <li><a href="https://github.com/gorules/zen">GoRules &mdash; ZEN Engine (open source)</a></li>
+        <li><a href="https://www.medrxiv.org/content/10.64898/2026.01.21.26344531.full.pdf">Cleveland Clinic, medRxiv (Jan 2026) &mdash; hybrid regex/LLM extraction pipeline</a></li>
+      </ol>
+    </div>
+  </article>
+</main>
+<script src="../main.js" defer></script>
+</body>
+</html>
