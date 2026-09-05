@@ -61,6 +61,45 @@
     </p>
 
     <p>
+      That discount isn't a coupon, it's downstream of how the hardware
+      actually works &mdash; and the same physics explains a pricing detail
+      from the last post in this series that I glossed over: why output
+      tokens cost roughly 5x more than input tokens, on every provider,
+      including the exact Haiku 4.5 and Opus 5 numbers I quoted there.
+      Inference has two phases with very different economics. Prefill
+      &mdash; reading your entire prompt &mdash; happens in one parallel
+      pass across all the input tokens at once: compute-bound, the GPU's
+      tensor cores are busy the whole time, cheap per token. Decode
+      &mdash; generating the output &mdash; happens one token at a time,
+      and each single token requires a full pass through the model's
+      weights: memory-bandwidth-bound, the GPU's compute sits mostly idle
+      waiting on data to arrive. That asymmetry is why output is the
+      expensive half of every API call, not a pricing quirk.
+    </p>
+
+    <div class="diagram">
+      <img src="images/prefill-decode.svg" alt="Flowchart contrasting prefill and decode. Prefill reads the whole prompt in one parallel pass and is compute-bound, with tensor cores busy and cheap per token, leading to lower input pricing. Decode generates each output token one at a time and is memory-bandwidth-bound, with the GPU idling while waiting on weights, leading to output pricing roughly five times higher.">
+    </div>
+    <p class="diagram-caption">
+      Input is a parallel read. Output is a sequential, one-token-at-a-time reload of the whole model &mdash; that's the whole reason it costs more.
+    </p>
+
+    <p>
+      It's also why batching pays for itself rather than just being a
+      promotion: serving one request at a time wastes most of the GPU
+      waiting on memory, but running many requests together lets that same
+      weight-load be shared across far more tokens generated per pass
+      &mdash; better hardware utilization, more tokens per GPU-hour, and
+      idle capacity a provider can slot batch jobs into instead of holding
+      a GPU in reserve for your one request right now. Neither Anthropic
+      nor OpenAI has published the exact cost math behind the 50% figure
+      itself, so treat that specific number as a business decision &mdash;
+      but the mechanism that makes a discount like it affordable at all is
+      real, documented, and the reason I'd bet on batch pricing sticking
+      around rather than disappearing as a promo would.
+    </p>
+
+    <p>
       The second lever shrinks what you send instead of what you pay per
       token. Microsoft Research's LLMLingua compresses prompts up to 20x
       with minimal measured loss on QA and reasoning benchmarks, and its
@@ -137,6 +176,8 @@
       <ol>
         <li><a href="https://platform.claude.com/docs/en/build-with-claude/batch-processing">Anthropic &mdash; Message Batches API</a></li>
         <li><a href="https://developers.openai.com/api/docs/guides/batch">OpenAI &mdash; Batch API</a></li>
+        <li><a href="https://developer.nvidia.com/blog/mastering-llm-techniques-inference-optimization/">NVIDIA &mdash; Mastering LLM Techniques: Inference Optimization</a></li>
+        <li><a href="https://arxiv.org/abs/2309.06180">Kwon et al. &mdash; PagedAttention / vLLM (SOSP 2023)</a></li>
         <li><a href="https://www.microsoft.com/en-us/research/blog/llmlingua-innovating-llm-efficiency-with-prompt-compression/">Microsoft Research &mdash; LLMLingua</a></li>
         <li><a href="https://github.com/gorules/zen">GoRules &mdash; ZEN Engine (open source)</a></li>
         <li><a href="https://www.medrxiv.org/content/10.64898/2026.01.21.26344531.full.pdf">Cleveland Clinic, medRxiv (Jan 2026) &mdash; hybrid regex/LLM extraction pipeline</a></li>
