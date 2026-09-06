@@ -34,54 +34,48 @@
     <p>
       Not every token-saving move is about using AI less. Some of it is just
       buying the same tokens cheaper, sending fewer of them for the same
-      result, or routing the easy 90% away from the model entirely. None of
-      it requires willpower. All of it requires knowing the levers exist
-      &mdash; and most teams I talk to are using zero of the three below,
-      not because they don't make sense, but because nobody's gone looking
-      for them yet.
+      result, or routing the easy 90% away from the model entirely. All of
+      it requires knowing the levers exist.
     </p>
 
     <p>
       The first lever is the dumbest one, and it's the one most people
       leave on the table: if the response doesn't need to come back in real
-      time, it shouldn't be priced like it does. Anthropic's Message Batches
+      time, you can reduce the cost. Anthropic's Message Batches
       API and OpenAI's Batch API both cut the token price in half &mdash;
       flat 50% off standard rates, for anything you can queue instead of
       wait on. Nightly reports, bulk classification, eval runs, backfilling
-      a dataset &mdash; none of that needs a synchronous response, and all
-      of it is currently running at double the price it needs to for a lot
-      of teams.
+      a dataset &mdash; none of that needs a synchronous response, and a lot
+      of workloads are running at double the price they need to be for a
+      lot of teams.
     </p>
 
     <div class="diagram">
       <img src="images/batch-vs-sync.svg" alt="Bar chart of API cost index for synchronous versus batch processing, both Anthropic and OpenAI, with synchronous indexed at 100 and batch at 50 for both providers.">
     </div>
     <p class="diagram-caption">
-      Same tokens, same model, half the price &mdash; the only cost is not needing the answer immediately.
+      Same tokens, same model, half the price &mdash; the diagram illustrates how much you can save by being patient, or realising your requirements aren't immediate.
     </p>
 
     <p>
-      That discount isn't a coupon, it's downstream of how the hardware
-      actually works &mdash; and the same physics explains a pricing detail
-      from the last post in this series that I glossed over: why output
-      tokens cost roughly 5x more than input tokens, on every provider,
-      including the exact Haiku 4.5 and Opus 5 numbers I quoted there.
-      Inference has two phases with very different economics. Prefill
-      &mdash; reading your entire prompt &mdash; happens in one parallel
-      pass across all the input tokens at once: compute-bound, the GPU's
-      tensor cores are busy the whole time, cheap per token. Decode
+      The discount is possible due to how the hardware works and is also
+      why output tokens cost roughly 5x more than input tokens, on every
+      provider. Inference has two phases with very different economics.
+      Prefill &mdash; reading your entire prompt &mdash; happens in one
+      parallel pass across all the input tokens at once: compute-bound, the
+      GPU's tensor cores are busy the whole time, cheap per token. Decode
       &mdash; generating the output &mdash; happens one token at a time,
       and each single token requires a full pass through the model's
       weights: memory-bandwidth-bound, the GPU's compute sits mostly idle
       waiting on data to arrive. That asymmetry is why output is the
-      expensive half of every API call, not a pricing quirk.
+      expensive half of every API call.
     </p>
 
     <div class="diagram">
       <img src="images/prefill-decode.svg" alt="Flowchart contrasting prefill and decode. Prefill reads the whole prompt in one parallel pass and is compute-bound, with tensor cores busy and cheap per token, leading to lower input pricing. Decode generates each output token one at a time and is memory-bandwidth-bound, with the GPU idling while waiting on weights, leading to output pricing roughly five times higher.">
     </div>
     <p class="diagram-caption">
-      Input is a parallel read. Output is a sequential, one-token-at-a-time reload of the whole model &mdash; that's the whole reason it costs more.
+      Input is a parallel read. Output is a sequential, one-token-at-a-time reload of the whole model.
     </p>
 
     <p>
@@ -100,16 +94,17 @@
     </p>
 
     <p>
-      The second lever shrinks what you send instead of what you pay per
-      token. Microsoft Research's LLMLingua compresses prompts up to 20x
-      with minimal measured loss on QA and reasoning benchmarks, and its
-      follow-up, LongLLMLingua, found something sharper: in long-context RAG
-      setups, compressing down to roughly a quarter of the original tokens
-      didn't just cut cost &mdash; it improved task performance by up to
-      21.4%, because a shorter, denser context fights the "lost in the
-      middle" problem that long contexts create in the first place. Cutting
-      tokens and improving accuracy aren't in tension here. Stuffing a
-      model's context window is a habit, not a requirement.
+      The second lever is shrinking the tokens you send and receive. You
+      can use a tool like LLMLingua to compress your prompts &mdash; up to
+      20x &mdash; with close to no loss in quality. In fact, you get
+      improved performance on RAG use cases, because a shorter, denser
+      context fights the "lost in the middle" problem that long contexts
+      create. On the output side, a tool like
+      <a href="https://caveman.so/">Caveman</a> aims to do the same thing
+      in reverse: its own published number is 65% fewer output tokens,
+      byte-for-byte identical for things like code and error output, though
+      that's measured across a small sample of prompts so far, not a large
+      production workload.
     </p>
 
     <p>
@@ -131,36 +126,10 @@
     </p>
 
     <p>
-      But the honest version of this lever isn't "regex beats the model" —
-      a Cleveland Clinic study published on medRxiv in January 2026 makes
-      that precise. Extracting structured fields from free-text cardiac
-      test reports, regex alone scored an F1 of 0.74 &mdash; good enough to
-      look useful, not good enough to trust. Adding a targeted,
-      on-premises LLM stage for exactly the fields regex got wrong pushed
-      that to 0.98. The lesson isn't "skip the model." It's: let the
-      deterministic layer handle everything it can handle correctly, and
-      spend the model's judgment only on the fraction that actually needs
-      it &mdash; which is a much smaller, and much cheaper, fraction than
-      "every request."
-    </p>
-
-    <p>
-      Two things I looked into and would flag before you build a business
-      case around them: semantic caching &mdash; tools like GPTCache or
-      Redis's LangCache, which return a cached answer for a
-      semantically-similar past query instead of re-calling the model
-      &mdash; is mechanically sound, but neither vendor has published a
-      real, audited hit-rate or dollar figure; the "70% savings" numbers
-      circulating online trace back to blog posts, not disclosed
-      deployments. Same caveat applies to most of the newer LLM-routing
-      startups: real companies, plausible pitch, but the specific
-      savings percentages you'll find for them are aggregator-blog math,
-      not vendor-disclosed results. That doesn't make either idea wrong
-      &mdash; a cache that returns a stored answer instead of a fresh
-      generation is obviously going to save something on a repetitive
-      workload &mdash; it just means you should run your own before-and-after
-      on your own traffic before you put a number in a slide. Worth
-      trying both. Worth verifying the number yourself before you repeat it.
+      This isn't a case to replace all your AI flows, but instead to route
+      only the hardest parts that the deterministic layer can't handle to a
+      satisfactory level for whatever metric is important to you (e.g.
+      precision, coverage).
     </p>
 
     <p>
@@ -168,7 +137,8 @@
       prompt it, or how much AI your team uses. They touch the plumbing
       around it &mdash; when you call it, how much you hand it, and whether
       you needed to call it at all. That's the whole point of tokenmaxxing
-      done right: the savings that don't cost you anything to take.
+      done right: the savings that don't cost you anything to take. That's
+      a better way to tokenmaxx, imo.
     </p>
 
     <div class="references">
@@ -179,8 +149,8 @@
         <li><a href="https://developer.nvidia.com/blog/mastering-llm-techniques-inference-optimization/">NVIDIA &mdash; Mastering LLM Techniques: Inference Optimization</a></li>
         <li><a href="https://arxiv.org/abs/2309.06180">Kwon et al. &mdash; PagedAttention / vLLM (SOSP 2023)</a></li>
         <li><a href="https://www.microsoft.com/en-us/research/blog/llmlingua-innovating-llm-efficiency-with-prompt-compression/">Microsoft Research &mdash; LLMLingua</a></li>
+        <li><a href="https://caveman.so/">Caveman &mdash; output token compression</a></li>
         <li><a href="https://github.com/gorules/zen">GoRules &mdash; ZEN Engine (open source)</a></li>
-        <li><a href="https://www.medrxiv.org/content/10.64898/2026.01.21.26344531.full.pdf">Cleveland Clinic, medRxiv (Jan 2026) &mdash; hybrid regex/LLM extraction pipeline</a></li>
       </ol>
     </div>
   </article>
