@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3 — The cheapest token is the one you don't send — Farouk Umar</title>
+<meta name="description" content="Three concrete ways to cut AI spend that have nothing to do with using AI less: batch it, compress it, or don't call a model at all.">
+
+<link rel="icon" type="image/svg+xml" href="images/funnel-favicon.svg">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://papa.onle.gs/writing/the-cheapest-token-is-the-one-you-dont-send.html">
+<meta property="og:title" content="3 — The cheapest token is the one you don't send">
+<meta property="og:description" content="Three concrete ways to cut AI spend that have nothing to do with using AI less: batch it, compress it, or don't call a model at all.">
+<meta property="og:image" content="https://papa.onle.gs/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="1200">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="3 — The cheapest token is the one you don't send">
+<meta name="twitter:description" content="Three concrete ways to cut AI spend that have nothing to do with using AI less: batch it, compress it, or don't call a model at all.">
+<meta name="twitter:image" content="https://papa.onle.gs/og.jpg">
+
+<link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+<main>
+  <a class="back" href="index.html">&larr; Writing</a>
+
+  <article class="prose">
+    <h1>3 — The cheapest token is the one you don't send</h1>
+    <p class="article-meta">Part of 5 under <em>Tokenmaxxing</em> &middot; Farouk Umar</p>
+
+    <p>
+      Not every token-saving move is about using AI less. Some of it is just
+      buying the same tokens cheaper, sending fewer of them for the same
+      result, or routing the easy 90% away from the model entirely. All of
+      it requires knowing the levers exist.
+    </p>
+
+    <p>
+      The first lever is the dumbest one, and it's the one most people
+      leave on the table: if the response doesn't need to come back in real
+      time, you can reduce the cost. Anthropic's Message Batches
+      API and OpenAI's Batch API both cut the token price in half &mdash;
+      flat 50% off standard rates, for anything you can queue instead of
+      wait on. Nightly reports, bulk classification, eval runs, backfilling
+      a dataset &mdash; none of that needs a synchronous response, and a lot
+      of workloads are running at double the price they need to be for a
+      lot of teams.
+    </p>
+
+    <div class="diagram">
+      <img src="images/batch-vs-sync.svg" alt="Bar chart of API cost index for synchronous versus batch processing, both Anthropic and OpenAI, with synchronous indexed at 100 and batch at 50 for both providers.">
+    </div>
+    <p class="diagram-caption">
+      Same tokens, same model, half the price &mdash; the diagram illustrates how much you can save by being patient, or realising your requirements aren't immediate.
+    </p>
+
+    <p>
+      The discount is possible due to how the hardware works and is also
+      why output tokens cost roughly 5x more than input tokens, on every
+      provider. Inference has two phases with very different economics.
+      Prefill &mdash; reading your entire prompt &mdash; happens in one
+      parallel pass across all the input tokens at once: compute-bound, the
+      GPU's tensor cores are busy the whole time, cheap per token. Decode
+      &mdash; generating the output &mdash; happens one token at a time,
+      and each single token requires a full pass through the model's
+      weights: memory-bandwidth-bound, the GPU's compute sits mostly idle
+      waiting on data to arrive. That asymmetry is why output is the
+      expensive half of every API call.
+    </p>
+
+    <div class="diagram">
+      <img src="images/prefill-decode.svg" alt="Flowchart contrasting prefill and decode. Prefill reads the whole prompt in one parallel pass and is compute-bound, with tensor cores busy and cheap per token, leading to lower input pricing. Decode generates each output token one at a time and is memory-bandwidth-bound, with the GPU idling while waiting on weights, leading to output pricing roughly five times higher.">
+    </div>
+    <p class="diagram-caption">
+      Input is a parallel read. Output is a sequential, one-token-at-a-time reload of the whole model.
+    </p>
+
+    <p>
+      It's also why batching pays for itself rather than just being a
+      promotion: serving one request at a time wastes most of the GPU
+      waiting on memory, but running many requests together lets that same
+      weight-load be shared across far more tokens generated per pass
+      &mdash; better hardware utilization, more tokens per GPU-hour, and
+      idle capacity a provider can slot batch jobs into instead of holding
+      a GPU in reserve for your one request right now. Neither Anthropic
+      nor OpenAI has published the exact cost math behind the 50% figure
+      itself, so treat that specific number as a business decision &mdash;
+      but the mechanism that makes a discount like it affordable at all is
+      real, documented, and the reason I'd bet on batch pricing sticking
+      around rather than disappearing as a promo would.
+    </p>
+
+    <p>
+      The second lever is shrinking the tokens you send and receive. You
+      can use a tool like LLMLingua to compress your prompts &mdash; up to
+      20x &mdash; with close to no loss in quality. In fact, you get
+      improved performance on RAG use cases, because a shorter, denser
+      context fights the "lost in the middle" problem that long contexts
+      create. On the output side, a tool like
+      <a href="https://caveman.so/">Caveman</a> aims to do the same thing
+      in reverse: its own published number is 65% fewer output tokens,
+      byte-for-byte identical for things like code and error output, though
+      that's measured across a small sample of prompts so far, not a large
+      production workload.
+    </p>
+
+    <p>
+      The third lever is the one with the most room to be misused, so it's
+      worth being precise about it: don't call a model for a decision a
+      deterministic system can make correctly and near-instantly. A regex,
+      a keyword match, or a rules engine can resolve a large share of
+      requests before a model ever needs to see them &mdash; open-source
+      rules engines like GoRules' ZEN evaluate decisions in microseconds,
+      not the hundreds of milliseconds a model call costs even before you
+      count tokens.
+    </p>
+
+    <div class="diagram">
+      <img src="images/deterministic-gate.svg" alt="Flowchart showing an incoming request going through a deterministic gate made of regex or a rules engine. If it matches a known pattern, it's handled directly in microseconds at near-zero cost. If it's ambiguous or novel, it escalates to the model, which only handles the hard remainder.">
+    </div>
+    <p class="diagram-caption">
+      The gate doesn't replace the model. It narrows what reaches the model down to the part that actually needs judgment.
+    </p>
+
+    <p>
+      This isn't a case to replace all your AI flows, but instead to route
+      only the hardest parts that the deterministic layer can't handle to a
+      satisfactory level for whatever metric is important to you (e.g.
+      precision, coverage).
+    </p>
+
+    <p>
+      None of these three levers touch how good the model is, how you
+      prompt it, or how much AI your team uses. They touch the plumbing
+      around it &mdash; when you call it, how much you hand it, and whether
+      you needed to call it at all. That's the whole point of tokenmaxxing
+      done right: the savings that don't cost you anything to take. That's
+      a better way to tokenmaxx, imo.
+    </p>
+
+    <div class="references">
+      <h2>References</h2>
+      <ol>
+        <li><a href="https://platform.claude.com/docs/en/build-with-claude/batch-processing">Anthropic &mdash; Message Batches API</a></li>
+        <li><a href="https://developers.openai.com/api/docs/guides/batch">OpenAI &mdash; Batch API</a></li>
+        <li><a href="https://developer.nvidia.com/blog/mastering-llm-techniques-inference-optimization/">NVIDIA &mdash; Mastering LLM Techniques: Inference Optimization</a></li>
+        <li><a href="https://arxiv.org/abs/2309.06180">Kwon et al. &mdash; PagedAttention / vLLM (SOSP 2023)</a></li>
+        <li><a href="https://www.microsoft.com/en-us/research/blog/llmlingua-innovating-llm-efficiency-with-prompt-compression/">Microsoft Research &mdash; LLMLingua</a></li>
+        <li><a href="https://caveman.so/">Caveman &mdash; output token compression</a></li>
+        <li><a href="https://github.com/gorules/zen">GoRules &mdash; ZEN Engine (open source)</a></li>
+      </ol>
+    </div>
+  </article>
+</main>
+<script src="../main.js" defer></script>
+</body>
+</html>
