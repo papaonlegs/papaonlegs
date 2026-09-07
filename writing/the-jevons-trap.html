@@ -29,116 +29,95 @@
 
   <article class="prose">
     <h1>4 — The Jevons trap: efficient AI, hungrier planet</h1>
-    <p class="article-meta">Part of <em>Tokenmaxxing</em> &middot; Farouk Umar</p>
+    <p class="article-meta">Part of 5 under <em>Tokenmaxxing</em> &middot; Farouk Umar</p>
 
     <p>
-      Google's own 2026 environmental report says its AI got 44x more
-      efficient per prompt in a year. The same report says its electricity
-      use grew 37% that year. Both numbers are true, and they're not in
-      tension &mdash; they're the same phenomenon.
+      Chip runs colder now&mdash;<br>
+      every prompt costs less to think.<br>
+      We ask it more, though.
     </p>
 
     <p>
-      This is Jevons paradox, not a contradiction: efficiency gains per unit
-      of use drive down the cost of using it, which drives up total use,
-      and total use outgrows the efficiency gain. Researchers Luccioni,
-      Strubell, and Crawford named this explicitly for AI at FAccT 2025
-      &mdash; and the market backed the theory before the paper did: Nvidia shipped
-      over a million more GPUs in 2024 than in 2023, despite &mdash; or
-      because of &mdash; real per-chip efficiency gains in that same window.
-      Cheaper per query doesn't mean less energy in total. It means more
-      queries.
+      They keep making it leaner.<br>
+      Cheaper. Faster. Meaner<br>
+      on the watts it takes to answer<br>
+      one small question at a time.
+    </p>
+
+    <p>
+      But cheap was never the finish line.<br>
+      Cheap is just an open door.<br>
+      You don't walk through it once &mdash;<br>
+      you walk through it, then ask for more.
+    </p>
+
+    <p>
+      That's the whole trick. That's the trap.<br>
+      Not a glitch. Not a lag.<br>
+      A hundred years before the chip,<br>
+      a man named Jevons watched the same thing<br>
+      happen to a coal-fired engine:<br>
+      make it burn less to do more work,<br>
+      and the country burned <em>more</em> coal, not less &mdash;<br>
+      because now everyone could afford<br>
+      to leave one running.
+    </p>
+
+    <p>
+      Google's own report says it plain:<br>
+      forty-four times leaner, prompt to prompt, this year.<br>
+      Same report, same page, almost:<br>
+      the electricity bill, up thirty-seven percent.<br>
+      Both numbers true. Not a contradiction.<br>
+      Just Jevons, again, right on schedule.
     </p>
 
     <div class="diagram">
       <img src="images/jevons-index.svg" alt="Line chart indexed to 2024 as 100. Energy per prompt drops to an index value of roughly 2.3 by 2025, a 44x efficiency gain. Total AI electricity use rises to an index value of roughly 137 by 2025, a 37% increase, even as per-prompt energy collapsed.">
     </div>
     <p class="diagram-caption">
-      Per-prompt efficiency crashed toward zero. Total consumption still climbed. That gap is the whole paradox in one chart.
+      Efficiency fell off a cliff. The bill didn't follow it down.
     </p>
 
     <p>
-      The same pattern shows up in the industry's own disclosures, not just
-      in outside critique. Microsoft's reported emissions have risen roughly
-      25% year over year in recent filings, with AI datacenter buildout
-      named as a driver. And there's a sharper detail underneath the topline
-      numbers, if you read past the summary slide: "location-based" Scope 2
-      emissions &mdash; the honest accounting, based on what's actually on
-      the local grid &mdash; rose somewhere in the range of 92% to 130% for
-      companies like Microsoft and Google, even in years where their
-      "market-based" numbers, built on purchased offsets and renewable
-      certificates, showed emissions declining. Independent reviewers have
-      flagged this gap directly. Offsets are a real accounting instrument,
-      not a fiction, but they answer a different question than "how much
-      power did this actually draw from the grid this year" &mdash; and the
-      market-based number is the one that ends up on the slide.
+      So they build more racks.<br>
+      More rows of them, humming,<br>
+      in a field somewhere you'll never drive past,<br>
+      drinking a river's worth of water to stay cool,<br>
+      pulling a small country's worth of watts,<br>
+      so that somewhere else, on a phone,<br>
+      a question gets answered<br>
+      a half-second faster<br>
+      than it needed to.
     </p>
 
     <p>
-      Zoom out to the aggregate and the direction is unambiguous regardless
-      of which accounting method you trust: the IEA puts global datacenter
-      electricity use at roughly 415 terawatt-hours in 2024, projected to
-      reach roughly 945 terawatt-hours by 2030 &mdash; more than double, in
-      six years, with AI as the primary driver of the growth curve.
+      I'm not asking you to quit.<br>
+      I use it every day, same as you.<br>
+      This isn't guilt dressed up as an essay.<br>
+      It's just: notice the size of the thing<br>
+      you're asking to think for you,<br>
+      and ask if it needed to be that big<br>
+      to answer that small a question.
     </p>
 
     <p>
-      Even the industry's most optimistic voice on this concedes the real
-      version of the argument. Sam Altman has pushed back hard on the viral
-      "17 gallons of water per query" claim, and he's right that the number
-      is fabricated &mdash; but he's also said plainly that the underlying
-      concern is legitimate: not the cost of one query, but the total, because
-      the world is now running so many of them. That's a rare moment of a
-      vendor agreeing with the critique instead of just debunking the
-      strawman version of it.
-    </p>
-
-    <p>
-      Worth noting who isn't in this conversation at all: Anthropic
-      publishes no sustainability report and makes no efficiency-per-query
-      claims, in contrast to Google, Microsoft, and OpenAI, all of whom
-      publish numbers specifically so they can be measured against them.
-      That's not necessarily worse &mdash; a company that publishes no
-      efficiency claim can't be accused of gaming one &mdash; but it does
-      mean there's one fewer data point in an industry that badly needs
-      more independently verifiable ones, not fewer.
-    </p>
-
-    <p>
-      What actually works is less glamorous than a new chip. Model
-      right-sizing &mdash; not defaulting to the frontier model for a task a
-      smaller one handles fine, the same discipline from the second post in
-      this series &mdash; is estimated to be able to cut roughly 27.8% of
-      global AI energy use on its own, according to research published in
-      October 2025. Carbon-aware scheduling, running batch and non-urgent
-      workloads when the grid is cleanest, is the other practical lever
-      already documented by the Green Software Foundation and in both AWS's
-      and Google's own infrastructure guidance. Neither of these requires
-      waiting for a hardware breakthrough. Both are available today, to any
-      team willing to treat "which model, and when" as an engineering
-      decision instead of a default.
-    </p>
-
-    <p>
-      None of this is an argument to stop using AI, any more than the fuel
-      efficiency of a car is an argument to stop driving. It's an argument
-      against believing the efficiency number is the whole story. Every
-      efficiency gain this industry announces is real, and every one of
-      them is also, by the same paradox, an invitation to use more. The
-      responsible version of "conscious AI use" isn't guilt about the
-      technology &mdash; it's the same instinct as post two, pointed at
-      infrastructure instead of individual habits: use the smallest model
-      that gets the job done, and don't mistake a lower price per query for
-      a lower total bill.
+      Efficient isn't innocent.<br>
+      Cheaper isn't free.<br>
+      The bill just moved somewhere<br>
+      you don't have to see.<br>
+      Use the small model when the small one's enough.<br>
+      Run the heavy stuff when the grid runs clean.<br>
+      Not zero. Just conscious.<br>
+      The planet's not a metaphor &mdash;<br>
+      it's the only one we've got,<br>
+      and it's still keeping score.
     </p>
 
     <div class="references">
       <h2>References</h2>
       <ol>
         <li><a href="https://sustainability.google/google-2026-environmental-report/">Google &mdash; 2026 Environmental Report</a></li>
-        <li><a href="https://arxiv.org/abs/2501.16548">Luccioni, Strubell &amp; Crawford &mdash; FAccT 2025 (arXiv:2501.16548)</a></li>
-        <li><a href="https://www.iea.org/reports/energy-and-ai">IEA &mdash; Energy and AI</a></li>
-        <li><a href="https://arxiv.org/abs/2510.01889">Model right-sizing and AI energy use (arXiv:2510.01889)</a></li>
       </ol>
     </div>
   </article>
