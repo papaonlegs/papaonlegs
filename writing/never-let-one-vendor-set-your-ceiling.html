@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>5 — Never let one vendor set your ceiling — Farouk Umar</title>
+<meta name="description" content="I'm on Claude Max 20x — some days I burn the weekly cap in ~30 minutes. Moved my daily driver to ChatGPT Plus. Not an 'OpenAI wins' story — a vendor-ceiling story.">
+
+<link rel="icon" type="image/svg+xml" href="images/branching-favicon.svg">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://papa.onle.gs/writing/never-let-one-vendor-set-your-ceiling.html">
+<meta property="og:title" content="5 — Never let one vendor set your ceiling">
+<meta property="og:description" content="I'm on Claude Max 20x — some days I burn the weekly cap in ~30 minutes. Moved my daily driver to ChatGPT Plus. Not an 'OpenAI wins' story — a vendor-ceiling story.">
+<meta property="og:image" content="https://papa.onle.gs/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="1200">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="5 — Never let one vendor set your ceiling">
+<meta name="twitter:description" content="I'm on Claude Max 20x — some days I burn the weekly cap in ~30 minutes. Moved my daily driver to ChatGPT Plus. Not an 'OpenAI wins' story — a vendor-ceiling story.">
+<meta name="twitter:image" content="https://papa.onle.gs/og.jpg">
+
+<link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+<main>
+  <a class="back" href="index.html">&larr; Writing</a>
+
+  <article class="prose">
+    <h1>5 — Never let one vendor set your ceiling</h1>
+    <p class="article-meta">Part of 5 under <em>Tokenmaxxing</em> &middot; Farouk Umar</p>
+
+    <p>
+      I'm on Claude Max 20x &mdash; $200 a month. Some days I burn the weekly
+      cap in about thirty minutes. I moved my daily driver over to ChatGPT
+      Plus and haven't hit a wall yet. This isn't an "OpenAI wins" story.
+      It's a "never let one vendor set your ceiling" story.
+    </p>
+
+    <p>
+      Don't let any single vendor's rate-limit policy define your actual
+      capacity. There's tools out there for this e.g. Hydra, that do
+      automatic failover between e.g. Claude Code, OpenCode, Codex, and Pi
+      the moment one of them hits a limit &mdash; the workload keeps moving,
+      it stops caring which provider is doing the work at any given moment.
+    </p>
+
+    <div class="diagram">
+      <img src="images/provider-failover.svg" alt="Flowchart showing an agent workload that checks whether it has hit the current provider's weekly or session limit. If not, it keeps going on the current provider. If it has hit the limit, a failover layer such as Hydra routes the work to one of several alternative providers — Claude Code, OpenCode, Codex, or Pi — and the result flows back to the same workload regardless of which one handled it.">
+    </div>
+    <p class="diagram-caption">
+      The workload doesn't know or care which provider ran it.
+    </p>
+
+    <p>
+      This kind of portability is more possible today than it was a year
+      ago, since Agent Skills became an open standard in December 2025.
+    </p>
+
+    <p>
+      This won't give us as much savings as proper prompt compression,
+      regular scripting, or even just having a local model but is a rather
+      good mechanism for workflows that must complete. I treat this more
+      like a failure mode (vendor outage), which I am planning to write
+      more about soon.
+    </p>
+
+    <p>
+      In practice, what changed for me was reducing the kind of work I gave
+      Claude and migrating more use cases over to ChatGPT.
+    </p>
+
+    <p>
+      Be skeptical of anyone selling you "multi-provider" as a product. You
+      want to control your flexibility.
+    </p>
+
+    <div class="references">
+      <h2>References</h2>
+      <ol>
+        <li><a href="https://agentskills.io">agentskills.io</a></li>
+      </ol>
+    </div>
+  </article>
+</main>
+<script src="../main.js" defer></script>
+</body>
+</html>
